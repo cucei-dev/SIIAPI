@@ -14,5 +14,12 @@ engine = create_engine(
 def init_db():
      import app.modules.users.models
      import app.modules.auth.models
+     import app.modules.centro.models
+     import app.modules.materia.models
+     import app.modules.seccion.models
+     import app.modules.clase.models
+     import app.modules.profesor.models
+     import app.modules.aula.models
+     import app.modules.edificio.models
 
      SQLModel.metadata.create_all(engine)

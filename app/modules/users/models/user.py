@@ -16,4 +16,6 @@ class User(SQLModel, table=True):
     is_superuser: bool = Field(default=False)
     is_staff: bool = Field(default=False)
 
+    refresh_tokens: list["RefreshToken"] = Relationship(back_populates="user", cascade_delete=True)
+
     model_config = ConfigDict(from_attributes=True)
