@@ -3,56 +3,13 @@ from app.modules.users.schemas import UserCreate, UserUpdate, UserAllowedUpdate,
 from app.modules.users.models import User
 from app.core.exceptions import NotFoundException, ConflictException
 from app.core.security import hash_password
-import pyotp
-from app.core.security import encrypt
-from app.utils.send_mail import send_mail
-from app.api.schemas.mail import EmailSchema, EmailTemplate
-import json
-from datetime import datetime, timedelta
-from app.modules.notifications.repositories.notification_repository import NotificationRepository
-from app.modules.notifications.models import Notification
 
 class UserService:
     def __init__(
         self,
         repository: UserRepository,
-        notification_repository: NotificationRepository,
     ):
         self.repository = repository
-        self.notification_repository = notification_repository
-
-    async def email_verification(self, user: User):
-        expiration = datetime.now() + timedelta(hours=24)
-        code = encrypt(
-            json.dumps(
-                {
-                    "email": user.email,
-                    "expiration": expiration.timestamp(),
-                    "type": "email_verification",
-                }
-            ),
-        )
-
-        message = {
-            "name": user.name,
-            "code": code[8:],
-        }
-
-        self.notification_repository.create(
-            Notification(
-                message=message,
-                user_id=user.id,
-            )
-        )
-        
-        await send_mail(
-            EmailSchema(
-                recipients=[user.email],
-                subject="Email Verification",
-                template_body=message,
-                template=EmailTemplate.EMAIL_VERIFICATION,
-            )
-        )
 
     async def create_user(self, data: UserCreate | UserAllowedCreate, email_validate: bool = False) -> User:
         user = User.model_validate(data)
@@ -62,18 +19,13 @@ class UserService:
             raise ConflictException("Email already registered.")
 
         hashed_password = hash_password(user.password)
-        two_factor_secret = pyotp.random_base32()
 
         user.password = hashed_password
-        user.two_factor_secret = encrypt(two_factor_secret)
 
         if user.is_active:
             user.is_active = not email_validate
 
         user = self.repository.create(user)
-
-        if email_validate:
-            await self.email_verification(user)
 
         return user
 

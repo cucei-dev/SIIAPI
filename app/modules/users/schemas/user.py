@@ -31,8 +31,6 @@ class UserReadMinimal(UserBase):
 
 class UserRead(UserReadMinimal):
     refresh_tokens: list["RefreshTokenReadMinimal"] = []
-    notifications: list["NotificationReadMinimal"] = []
-    billing: Optional["BillingInfoReadMinimal"] = None
 
 class UserUpdate(UserAllowedUpdate):
     is_active: bool | None = None

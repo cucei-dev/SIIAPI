@@ -5,7 +5,7 @@ class Edificio(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str
 
-    centro_id: int = Field(index=True, foreign_key="centro.id", ondelete="CASCADE")
+    centro_id: int = Field(index=True, foreign_key="centrouniversitario.id", ondelete="CASCADE")
 
     centro: "CentroUniversitario" = Relationship(back_populates="edificios")
 

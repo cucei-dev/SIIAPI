@@ -14,3 +14,9 @@ class LoginResponse(SQLModel):
     access_token_expires_at: int
     refresh_token: str | None = None
     refresh_token_expires_at: int | None = None
+
+class RefreshTokenRequest(SQLModel):
+    refresh_token: str
+    user_agent: str | None = None
+    ip_address: str | None = None
+    audience: str | None = None

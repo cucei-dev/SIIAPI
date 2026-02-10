@@ -1,6 +1,6 @@
 from .refresh_token import RefreshTokenCreate, RefreshTokenRead, RefreshTokenUpdate
 from app.modules.users.schemas.user import UserReadMinimal
-from .auth import LoginData, LoginResponse, ToptActivationResponse, Verify2FA, RefreshTokenRequest, ToptConfirmationRequest, APITokenCreate
+from .auth import LoginData, LoginResponse, RefreshTokenRequest
 from .tokens import Token, RefreshTokenData, AccessTokenData
 
 RefreshTokenRead.model_rebuild()
@@ -14,9 +14,5 @@ __all__ = [
     "Token",
     "RefreshTokenData",
     "AccessTokenData",
-    "ToptActivationResponse",
-    "Verify2FA",
     "RefreshTokenRequest",
-    "ToptConfirmationRequest",
-    "APITokenCreate",
 ]
