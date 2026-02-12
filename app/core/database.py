@@ -21,5 +21,6 @@ def init_db():
      import app.modules.profesor.models
      import app.modules.aula.models
      import app.modules.edificio.models
+     import app.modules.calendario.models
 
      SQLModel.metadata.create_all(engine)
