@@ -7,7 +7,7 @@ class Clase(SQLModel, table=True):
     sesion: int | None = Field(default=None, nullable=True)
     hora_inicio: time | None = Field(default=None, nullable=True)
     hora_fin: time | None = Field(default=None, nullable=True)
-    dias: list[int] = Field(sa_column=Column(JSON, nullable=True))
+    dia: int | None = Field(default=None, nullable=True)
 
     seccion_id: int = Field(index=True, foreign_key="seccion.id", ondelete="CASCADE")
     aula_id: int | None = Field(index=True, foreign_key="aula.id", ondelete="CASCADE", default=None, nullable=True)
