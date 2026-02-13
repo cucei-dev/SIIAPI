@@ -14,7 +14,7 @@ async def create_aula(
     service: AulaService = Depends(get_aula_service),
     #user: User = Depends(user_is_staff),
 ):
-        return await service.create_aula(data)
+        return service.create_aula(data)
 
 @router.get("/{aula_id}", response_model=AulaRead)
 async def get_aula(

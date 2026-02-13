@@ -14,7 +14,7 @@ async def create_calendario(
     service: CalendarioService = Depends(get_calendario_service),
     #user: User = Depends(user_is_staff),
 ):
-        return await service.create_calendario(data)
+        return service.create_calendario(data)
 
 @router.get("/{calendario_id}", response_model=CalendarioRead)
 async def get_calendario(

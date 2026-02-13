@@ -14,7 +14,7 @@ async def create_seccion(
     service: SeccionService = Depends(get_seccion_service),
     #user: User = Depends(user_is_staff),
 ):
-        return await service.create_seccion(data)
+        return service.create_seccion(data)
 
 @router.get("/{seccion_id}", response_model=SeccionRead)
 async def get_seccion(

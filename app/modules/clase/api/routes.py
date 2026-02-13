@@ -14,7 +14,7 @@ async def create_clase(
     service: ClaseService = Depends(get_clase_service),
     #user: User = Depends(user_is_staff),
 ):
-        return await service.create_clase(data)
+        return service.create_clase(data)
 
 @router.get("/{clase_id}", response_model=ClaseRead)
 async def get_clase(

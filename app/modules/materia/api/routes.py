@@ -14,7 +14,7 @@ async def create_materia(
     service: MateriaService = Depends(get_materia_service),
     #user: User = Depends(user_is_staff),
 ):
-        return await service.create_materia(data)
+        return service.create_materia(data)
 
 @router.get("/{materia_id}", response_model=MateriaRead)
 async def get_materia(

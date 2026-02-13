@@ -14,7 +14,7 @@ async def create_user(
     service: UserService = Depends(get_user_service),
     user: User = Depends(user_is_superuser),
 ):
-        return await service.create_user(data)
+        return service.create_user(data)
 
 @router.get("/{user_id}", response_model=UserRead)
 async def get_user(

@@ -14,7 +14,7 @@ async def create_profesor(
     service: ProfesorService = Depends(get_profesor_service),
     #user: User = Depends(user_is_staff),
 ):
-        return await service.create_profesor(data)
+        return service.create_profesor(data)
 
 @router.get("/{profesor_id}", response_model=ProfesorRead)
 async def get_profesor(

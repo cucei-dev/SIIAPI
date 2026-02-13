@@ -14,7 +14,7 @@ async def create_centro(
     service: CentroUniversitarioService = Depends(get_centro_service),
     #user: User = Depends(user_is_staff),
 ):
-        return await service.create_centro(data)
+        return service.create_centro(data)
 
 @router.get("/{centro_id}", response_model=CentroUniversitarioRead)
 async def get_centro(

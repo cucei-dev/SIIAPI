@@ -14,7 +14,7 @@ async def create_edificio(
     service: EdificioService = Depends(get_edificio_service),
     #user: User = Depends(user_is_staff),
 ):
-        return await service.create_edificio(data)
+        return service.create_edificio(data)
 
 @router.get("/{edificio_id}", response_model=EdificioRead)
 async def get_edificio(

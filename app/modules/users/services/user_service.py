@@ -11,7 +11,7 @@ class UserService:
     ):
         self.repository = repository
 
-    async def create_user(self, data: UserCreate | UserAllowedCreate, email_validate: bool = False) -> User:
+    def create_user(self, data: UserCreate | UserAllowedCreate, email_validate: bool = False) -> User:
         user = User.model_validate(data)
 
         _,existing = self.repository.list({"email": user.email})
