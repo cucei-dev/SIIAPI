@@ -17,8 +17,17 @@ class SeccionBase(SQLModel):
 class SeccionCreate(SeccionBase):
     pass
 
-class SeccionUpdate(SeccionBase):
-    pass
+class SeccionUpdate(SQLModel):
+    name: str | None
+    nrc: str | None
+    cupos: int | None
+    cupos_disponibles: int | None
+    periodo_inicio: datetime | None
+    periodo_fin: datetime | None
+    centro_id: int | None
+    materia_id: int | None
+    profesor_id: int | None
+    calendario_id: int | None
 
 class SeccionReadMinimal(SeccionBase):
     id: int

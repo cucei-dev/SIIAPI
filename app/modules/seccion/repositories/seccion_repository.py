@@ -34,7 +34,7 @@ class SeccionRepository:
         if filters.get("profesor_id") is not None:
             statement = statement.where(Seccion.profesor_id == filters["profesor_id"])
             total_statement = total_statement.where(Seccion.profesor_id == filters["profesor_id"])
-            
+
         if filters.get("calendario_id") is not None:
             statement = statement.where(Seccion.calendario_id == filters["calendario_id"])
             total_statement = total_statement.where(Seccion.calendario_id == filters["calendario_id"])

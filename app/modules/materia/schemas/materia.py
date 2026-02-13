@@ -8,8 +8,10 @@ class MateriaBase(SQLModel):
 class MateriaCreate(MateriaBase):
     pass
 
-class MateriaUpdate(MateriaBase):
-    pass
+class MateriaUpdate(SQLModel):
+    name: str | None
+    creditos: int | None
+    clave: str | None
 
 class MateriaReadMinimal(MateriaBase):
     id: int

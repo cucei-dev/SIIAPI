@@ -13,8 +13,13 @@ class ClaseBase(SQLModel):
 class ClaseCreate(ClaseBase):
     pass
 
-class ClaseUpdate(ClaseBase):
-    pass
+class ClaseUpdate(SQLModel):
+    sesion: int | None
+    hora_inicio: time | None
+    hora_fin: time | None
+    dia: int | None
+    seccion_id: int | None
+    aula_id: int | None
 
 class ClaseReadMinimal(ClaseBase):
     id: int

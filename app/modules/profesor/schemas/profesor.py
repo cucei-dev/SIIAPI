@@ -6,8 +6,8 @@ class ProfesorBase(SQLModel):
 class ProfesorCreate(ProfesorBase):
     pass
 
-class ProfesorUpdate(ProfesorBase):
-    pass
+class ProfesorUpdate(SQLModel):
+    name: str | None
 
 class ProfesorReadMinimal(ProfesorBase):
     id: int

@@ -22,7 +22,7 @@ class ClaseRepository:
         if filters.get("seccion_id") is not None:
             statement = statement.where(Clase.seccion_id == filters["seccion_id"])
             total_statement = total_statement.where(Clase.seccion_id == filters["seccion_id"])
-        
+
         if filters.get("aula_id") is not None:
             statement = statement.where(Clase.aula_id == filters["aula_id"])
             total_statement = total_statement.where(Clase.aula_id == filters["aula_id"])

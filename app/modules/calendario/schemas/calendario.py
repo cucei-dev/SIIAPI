@@ -7,8 +7,9 @@ class CalendarioBase(SQLModel):
 class CalendarioCreate(CalendarioBase):
     pass
 
-class CalendarioUpdate(CalendarioBase):
-    pass
+class CalendarioUpdate(SQLModel):
+    name: str | None
+    siiau_id: str | None
 
 class CalendarioReadMinimal(CalendarioBase):
     id: int

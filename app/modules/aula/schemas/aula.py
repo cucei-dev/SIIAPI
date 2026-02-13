@@ -7,8 +7,9 @@ class AulaBase(SQLModel):
 class AulaCreate(AulaBase):
     pass
 
-class AulaUpdate(AulaBase):
-    pass
+class AulaUpdate(SQLModel):
+    name: str | None
+    edificio_id: int | None
 
 class AulaReadMinimal(AulaBase):
     id: int

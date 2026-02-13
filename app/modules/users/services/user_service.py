@@ -47,7 +47,7 @@ class UserService:
             _,existing = self.repository.list({"email": data.email})
             if existing:
                 raise ConflictException("Email already registered.")
-            
+
         update_data = data.model_dump(exclude_unset=True)
 
         for key, value in update_data.items():

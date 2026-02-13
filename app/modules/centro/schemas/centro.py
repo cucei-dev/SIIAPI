@@ -7,8 +7,9 @@ class CentroUniversitarioBase(SQLModel):
 class CentroUniversitarioCreate(CentroUniversitarioBase):
     pass
 
-class CentroUniversitarioUpdate(CentroUniversitarioBase):
-    pass
+class CentroUniversitarioUpdate(SQLModel):
+    name: str | None
+    siiau_id: str | None
 
 class CentroUniversitarioReadMinimal(CentroUniversitarioBase):
     id: int
