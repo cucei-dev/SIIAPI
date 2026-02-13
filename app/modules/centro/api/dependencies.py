@@ -4,7 +4,7 @@ from app.api.dependencies.database import get_session
 from sqlmodel import Session
 from fastapi import Depends
 
-def get_user_service(
+def get_centro_service(
     session: Session = Depends(get_session),
 ) -> CentroUniversitarioService:
     return CentroUniversitarioService(
