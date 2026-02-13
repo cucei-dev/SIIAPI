@@ -19,7 +19,7 @@ class ProfesorService:
         if not profesor:
             raise NotFoundException("Profesor not found.")
 
-    def list_profesors(self, **filters) -> tuple[list[Profesor], int]:
+    def list_profesores(self, **filters) -> tuple[list[Profesor], int]:
         return self.repository.list(filters)
 
     def update_profesor(self, profesor_id: int, data: ProfesorUpdate) -> Profesor:

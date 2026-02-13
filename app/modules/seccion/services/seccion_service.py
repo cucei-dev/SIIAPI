@@ -19,7 +19,7 @@ class SeccionService:
         if not seccion:
             raise NotFoundException("Sección not found.")
 
-    def list_seccions(self, **filters) -> tuple[list[Seccion], int]:
+    def list_secciones(self, **filters) -> tuple[list[Seccion], int]:
         return self.repository.list(filters)
 
     def update_seccion(self, seccion_id: int, data: SeccionUpdate) -> Seccion:
