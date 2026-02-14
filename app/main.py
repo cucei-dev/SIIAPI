@@ -9,7 +9,7 @@ from app.core.seed import seed_data
 async def lifespan(app: FastAPI):
     if settings.APP_DEBUG:
         init_db()
-        await seed_data()
+        seed_data()
     yield
 
 
