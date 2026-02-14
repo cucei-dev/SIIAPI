@@ -27,6 +27,18 @@ class ClaseRepository:
             statement = statement.where(Clase.aula_id == filters["aula_id"])
             total_statement = total_statement.where(Clase.aula_id == filters["aula_id"])
 
+        if filters.get("hora_inicio") is not None:
+            statement = statement.where(Clase.hora_inicio == filters["hora_inicio"])
+            total_statement = total_statement.where(Clase.hora_inicio == filters["hora_inicio"])
+
+        if filters.get("hora_fin") is not None:
+            statement = statement.where(Clase.hora_fin == filters["hora_fin"])
+            total_statement = total_statement.where(Clase.hora_fin == filters["hora_fin"])
+
+        if filters.get("dia") is not None:
+            statement = statement.where(Clase.dia == filters["dia"])
+            total_statement = total_statement.where(Clase.dia == filters["dia"])
+
         statement = statement.offset(filters.get("skip", 0)).limit(filters.get("limit", 100))
         clases = self.session.exec(statement).all()
         total = self.session.exec(total_statement).one()

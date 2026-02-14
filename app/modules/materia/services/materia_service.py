@@ -12,6 +12,11 @@ class MateriaService:
 
     def create_materia(self, data: MateriaCreate) -> Materia:
         materia = Materia.model_validate(data)
+        _,total = self.repository.list({"clave": materia.clave})
+
+        if total != 0:
+            raise ConflictException("Materia with that clave already exists.")
+
         return self.repository.create(materia)
 
     def get_materia(self, materia_id: int):

@@ -26,6 +26,7 @@ async def get_centro(
 
 @router.get("/", response_model=Pagination[CentroUniversitarioRead])
 async def list_centros(
+    siiau_id: int | None = None,
     search: str | None = None,
     skip: int = 0,
     limit: int = 100,
@@ -33,6 +34,7 @@ async def list_centros(
     #user: User = Depends(user_is_staff),
 ):
     centros, total = service.list_centros(
+        siiau_id=siiau_id,
         search=search,
         skip=skip,
         limit=limit,

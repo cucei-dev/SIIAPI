@@ -12,6 +12,11 @@ class CentroUniversitarioService:
 
     def create_centro(self, data: CentroUniversitarioCreate) -> CentroUniversitario:
         centro = CentroUniversitario.model_validate(data)
+        _,total = self.repository.list({"siiau_id": centro.siiau_id})
+
+        if total != 0:
+            raise ConflictException("Centro Universitario with that siiau_id already exists.")
+
         return self.repository.create(centro)
 
     def get_centro(self, centro_id: int):

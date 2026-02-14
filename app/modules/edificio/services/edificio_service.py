@@ -2,16 +2,29 @@ from app.modules.edificio.repositories.edificio_repository import EdificioReposi
 from app.modules.edificio.schemas import EdificioCreate, EdificioUpdate
 from app.modules.edificio.models import Edificio
 from app.core.exceptions import NotFoundException, ConflictException
+from app.modules.centro.repositories.centro_repository import CentroUniversitarioRepository
 
 class EdificioService:
     def __init__(
         self,
         repository: EdificioRepository,
+        centro_repository: CentroUniversitarioRepository,
     ):
         self.repository = repository
+        self.centro_repository = centro_repository
 
     def create_edificio(self, data: EdificioCreate) -> Edificio:
         edificio = Edificio.model_validate(data)
+        centro = self.centro_repository.get(edificio.centro_id)
+
+        if not centro:
+            raise NotFoundException("Centro Universitario not found.")
+
+        _,total = self.repository.list({"centro_id": edificio.centro_id, "name": edificio.name})
+
+        if total != 0:
+            raise ConflictException("Edificio with that name in that Centro Universitario already exists.")
+
         return self.repository.create(edificio)
 
     def get_edificio(self, edificio_id: int):

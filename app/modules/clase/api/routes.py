@@ -5,6 +5,7 @@ from .dependencies import get_clase_service
 from app.api.schemas import Pagination
 from app.api.dependencies.auth import user_is_staff
 from app.modules.users.models import User
+from datetime import time
 
 router = APIRouter()
 
@@ -26,6 +27,11 @@ async def get_clase(
 
 @router.get("/", response_model=Pagination[ClaseRead])
 async def list_clases(
+    seccion_id: int | None = None,
+    aula_id: int | None = None,
+    hora_inicio: time | None = None,
+    hora_fin: time | None = None,
+    dia: int | None = None,
     search: str | None = None,
     skip: int = 0,
     limit: int = 100,
@@ -33,6 +39,11 @@ async def list_clases(
     #user: User = Depends(user_is_staff),
 ):
     clases, total = service.list_clases(
+        seccion_id=seccion_id,
+        aula_id=aula_id,
+        hora_inicio=hora_inicio,
+        hora_fin=hora_fin,
+        dia=dia,
         search=search,
         skip=skip,
         limit=limit,

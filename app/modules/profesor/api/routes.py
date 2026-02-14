@@ -26,6 +26,7 @@ async def get_profesor(
 
 @router.get("/", response_model=Pagination[ProfesorRead])
 async def list_profesores(
+    name: str | None = None,
     search: str | None = None,
     skip: int = 0,
     limit: int = 100,
@@ -33,6 +34,7 @@ async def list_profesores(
     #user: User = Depends(user_is_staff),
 ):
     profesors, total = service.list_profesores(
+        name=name,
         search=search,
         skip=skip,
         limit=limit,

@@ -26,6 +26,11 @@ async def get_seccion(
 
 @router.get("/", response_model=Pagination[SeccionRead])
 async def list_secciones(
+    nrc: str | None = None,
+    centro_id: int | None = None,
+    materia_id: int | None = None,
+    profesor_id: int | None = None,
+    calendario_id: int | None = None,
     search: str | None = None,
     skip: int = 0,
     limit: int = 100,
@@ -33,6 +38,11 @@ async def list_secciones(
     #user: User = Depends(user_is_staff),
 ):
     seccions, total = service.list_secciones(
+        nrc=nrc,
+        centro_id=centro_id,
+        materia_id=materia_id,
+        profesor_id=profesor_id,
+        calendario_id=calendario_id,
         search=search,
         skip=skip,
         limit=limit,

@@ -23,6 +23,10 @@ class AulaRepository:
             statement = statement.where(Aula.edificio_id == filters["edificio_id"])
             total_statement = total_statement.where(Aula.edificio_id == filters["edificio_id"])
 
+        if filters.get("name") is not None:
+            statement = statement.where(Aula.name == filters["name"])
+            total_statement = total_statement.where(Aula.name == filters["name"])
+
         if filters.get("search"):
             search = f"%{filters['search']}%"
             statement = statement.where(

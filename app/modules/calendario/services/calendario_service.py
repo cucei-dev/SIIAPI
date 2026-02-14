@@ -12,6 +12,11 @@ class CalendarioService:
 
     def create_calendario(self, data: CalendarioCreate) -> Calendario:
         calendario = Calendario.model_validate(data)
+        _,total = self.repository.list({"siiau_id": calendario.siiau_id})
+
+        if total != 0:
+            raise ConflictException("Calendario with that siiau_id already exists.")
+
         return self.repository.create(calendario)
 
     def get_calendario(self, calendario_id: int):

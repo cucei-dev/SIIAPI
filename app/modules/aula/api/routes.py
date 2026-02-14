@@ -26,6 +26,8 @@ async def get_aula(
 
 @router.get("/", response_model=Pagination[AulaRead])
 async def list_aulas(
+    edificio_id: int | None = None,
+    name: str | None = None,
     search: str | None = None,
     skip: int = 0,
     limit: int = 100,
@@ -33,6 +35,8 @@ async def list_aulas(
     #user: User = Depends(user_is_staff),
 ):
     aulas, total = service.list_aulas(
+        edificio_id=edificio_id,
+        name=name,
         search=search,
         skip=skip,
         limit=limit,

@@ -23,6 +23,10 @@ class EdificioRepository:
             statement = statement.where(Edificio.centro_id == filters["centro_id"])
             total_statement = total_statement.where(Edificio.centro_id == filters["centro_id"])
 
+        if filters.get("name") is not None:
+            statement = statement.where(Edificio.name == filters["name"])
+            total_statement = total_statement.where(Edificio.name == filters["name"])
+
         if filters.get("search"):
             search = f"%{filters['search']}%"
             statement = statement.where(

@@ -12,6 +12,11 @@ class ProfesorService:
 
     def create_profesor(self, data: ProfesorCreate) -> Profesor:
         profesor = Profesor.model_validate(data)
+        _,total = self.repository.list({"name": profesor.name})
+
+        if total != 0:
+            raise ConflictException("Profesor with that name already exists.")
+
         return self.repository.create(profesor)
 
     def get_profesor(self, profesor_id: int):

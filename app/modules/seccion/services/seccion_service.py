@@ -2,16 +2,53 @@ from app.modules.seccion.repositories.seccion_repository import SeccionRepositor
 from app.modules.seccion.schemas import SeccionCreate, SeccionUpdate
 from app.modules.seccion.models import Seccion
 from app.core.exceptions import NotFoundException, ConflictException
+from app.modules.calendario.repositories.calendario_repository import CalendarioRepository
+from app.modules.centro.repositories.centro_repository import CentroUniversitarioRepository
+from app.modules.materia.repositories.materia_repository import MateriaRepository
+from app.modules.profesor.repositories.profesor_repository import ProfesorRepository
 
 class SeccionService:
     def __init__(
         self,
         repository: SeccionRepository,
+        calendario_repository: CalendarioRepository,
+        centro_repository: CentroUniversitarioRepository,
+        materia_repository: MateriaRepository,
+        profesor_repository: ProfesorRepository,
     ):
         self.repository = repository
+        self.calendario_repository = calendario_repository
+        self.centro_repository = centro_repository
+        self.materia_repository = materia_repository
+        self.profesor_repository = profesor_repository
 
     def create_seccion(self, data: SeccionCreate) -> Seccion:
         seccion = Seccion.model_validate(data)
+        calendario = self.calendario_repository.get(seccion.calendario_id)
+
+        if not calendario:
+            raise NotFoundException("Calendario not found.")
+        
+        centro = self.centro_repository.get(seccion.centro_id)
+
+        if not centro:
+            raise NotFoundException("Centro Universitario not found.")
+        
+        materia = self.materia_repository.get(seccion.materia_id)
+
+        if not materia:
+            raise NotFoundException("Materia not found.")
+        
+        if seccion.profesor_id is not None:
+            profesor = self.profesor_repository.get(seccion.profesor_id)
+
+            if not profesor:
+                raise NotFoundException("Profesor not found.")
+
+        _,total = self.repository.list({"nrc": seccion.nrc, "calendario_id": seccion.calendario_id})
+
+        if total != 0:
+            raise ConflictException("Seccion with that nrc in that Calendario already exists.")
         return self.repository.create(seccion)
 
     def get_seccion(self, seccion_id: int):

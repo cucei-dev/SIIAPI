@@ -3,7 +3,7 @@ from pydantic import ConfigDict
 
 class Edificio(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    name: str
+    name: str = Field(index=True)
 
     centro_id: int = Field(index=True, foreign_key="centrouniversitario.id", ondelete="CASCADE")
 

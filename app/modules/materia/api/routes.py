@@ -26,6 +26,7 @@ async def get_materia(
 
 @router.get("/", response_model=Pagination[MateriaRead])
 async def list_materias(
+    clave: str | None = None,
     search: str | None = None,
     skip: int = 0,
     limit: int = 100,
@@ -33,6 +34,7 @@ async def list_materias(
     #user: User = Depends(user_is_staff),
 ):
     materias, total = service.list_materias(
+        clave=clave,
         search=search,
         skip=skip,
         limit=limit,

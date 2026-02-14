@@ -26,6 +26,8 @@ async def get_edificio(
 
 @router.get("/", response_model=Pagination[EdificioRead])
 async def list_edificios(
+    centro_id: int | None = None,
+    name: str | None = None,
     search: str | None = None,
     skip: int = 0,
     limit: int = 100,
@@ -33,6 +35,8 @@ async def list_edificios(
     #user: User = Depends(user_is_staff),
 ):
     edificios, total = service.list_edificios(
+        centro_id=centro_id,
+        name=name,
         search=search,
         skip=skip,
         limit=limit,

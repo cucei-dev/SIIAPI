@@ -5,7 +5,7 @@ from pydantic import ConfigDict
 class Seccion(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str
-    nrc: str = Field(index=True, unique=True)
+    nrc: str
     cupos: int
     cupos_disponibles: int
     periodo_inicio: datetime | None = Field(default=None, nullable=True)

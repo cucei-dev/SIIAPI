@@ -26,6 +26,7 @@ async def get_calendario(
 
 @router.get("/", response_model=Pagination[CalendarioRead])
 async def list_calendarios(
+    siiau_id: int | None = None,
     search: str | None = None,
     skip: int = 0,
     limit: int = 100,
@@ -33,6 +34,7 @@ async def list_calendarios(
     #user: User = Depends(user_is_staff),
 ):
     calendarios, total = service.list_calendarios(
+        siiau_id=siiau_id,
         search=search,
         skip=skip,
         limit=limit,

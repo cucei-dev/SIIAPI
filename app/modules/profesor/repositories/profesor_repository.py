@@ -19,6 +19,10 @@ class ProfesorRepository:
         statement = select(Profesor)
         total_statement = select(func.count()).select_from(Profesor)
 
+        if filters.get("name") is not None:
+            statement = statement.where(Profesor.name == filters["name"])
+            total_statement = total_statement.where(Profesor.name == filters["name"])
+
         if filters.get("search"):
             search = f"%{filters['search']}%"
             statement = statement.where(
