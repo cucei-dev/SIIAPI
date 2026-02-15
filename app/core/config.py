@@ -25,7 +25,7 @@ class Settings:
     APP_NAME: str = os.getenv("APP_NAME")
     APP_SITE: str = os.getenv("APP_SITE", "localhost")
     APP_ENV: str = os.getenv("APP_ENV", "dev")
-    APP_VERSION: str = "0.0.1"
+    APP_VERSION: str = "1.0.0"
     APP_DESCRIPTION: str = os.getenv("APP_DESCRIPTION")
     APP_DEBUG: bool = get_bool(os.getenv("APP_DEBUG", "true"))
     
