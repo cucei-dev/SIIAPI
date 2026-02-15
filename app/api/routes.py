@@ -9,6 +9,7 @@ from app.modules.profesor.api.routes import router as profesores_router
 from app.modules.clase.api.routes import router as clases_router
 from app.modules.edificio.api.routes import router as edificios_router
 from app.modules.aula.api.routes import router as aulas_router
+from app.modules.tasks.api.routes import router as tasks_router
 
 router = APIRouter()
 
@@ -22,3 +23,4 @@ router.include_router(edificios_router, prefix="/edificios", tags=["Edificios"])
 router.include_router(aulas_router, prefix="/aulas", tags=["Aulas"])
 router.include_router(auth_router, prefix="/auth", tags=["Auth"])
 router.include_router(users_router, prefix="/users", tags=["Users"])
+router.include_router(tasks_router, prefix="/tasks", tags=["Tasks"])

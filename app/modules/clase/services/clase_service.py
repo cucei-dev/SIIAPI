@@ -22,11 +22,6 @@ class ClaseService:
 
         if not seccion:
             raise NotFoundException("Sección not found.")
-        
-        aula = self.aula_repository.get(clase.aula_id)
-
-        if not aula:
-            raise NotFoundException("Aula not found.")
 
         _,total = self.repository.list(
             {
@@ -38,7 +33,13 @@ class ClaseService:
             }
         )
 
-        if total != 0:
+        if total != 0 and (
+            clase.seccion_id is not None and
+            clase.aula_id is not None and
+            clase.hora_inicio is not None and
+            clase.hora_fin is not None and
+            clase.dia is not None
+        ):
             raise ConflictException("A clase with same parameters already exists.")
         return self.repository.create(clase)
 
