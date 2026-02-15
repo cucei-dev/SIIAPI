@@ -1,11 +1,12 @@
 import re
 from datetime import datetime, time
+from typing import Any, Optional
 
 import requests
 from bs4 import BeautifulSoup
 
 from app.core.config import settings
-from app.core.exceptions import ConflictException
+from app.core.exceptions import ConflictException, NotFoundException
 from app.modules.aula.schemas import AulaCreate
 from app.modules.aula.services.aula_service import AulaService
 from app.modules.calendario.services.calendario_service import \
@@ -20,7 +21,7 @@ from app.modules.materia.schemas import MateriaCreate
 from app.modules.materia.services.materia_service import MateriaService
 from app.modules.profesor.schemas import ProfesorCreate
 from app.modules.profesor.services.profesor_service import ProfesorService
-from app.modules.seccion.schemas import SeccionCreate
+from app.modules.seccion.schemas import SeccionCreate, SeccionUpdate
 from app.modules.seccion.services.seccion_service import SeccionService
 from app.modules.tasks.schemas.siiau import SeccionSiiau
 
@@ -46,7 +47,7 @@ class TasksService:
         self.aula_service = aula_service
         self.clase_service = clase_service
 
-    def parse_table(self, soup: BeautifulSoup) -> list[SeccionSiiau]:
+    def parse_table(self, soup: BeautifulSoup) -> list[dict]:
         tabla = soup.find("table")
         if not tabla:
             return []
@@ -100,7 +101,7 @@ class TasksService:
                 else:
                     horario_str = txt(tds[7])
 
-            if horario_str.strip():
+            if horario_str and horario_str.strip():
                 sesiones = horario_str.split(";")
                 for sesion in sesiones:
                     partes = [p.strip() for p in sesion.split("|")]
@@ -134,7 +135,8 @@ class TasksService:
 
     def make_request(
         self, calendario: str, centro: str, limite: int = 15000
-    ) -> list[SeccionSiiau]:
+    ) -> list[dict]:
+        """Make request to SIIAU and return parsed data as list of dicts"""
         payload = {
             "ciclop": calendario,
             "cup": centro,
@@ -146,91 +148,199 @@ class TasksService:
 
         return self.parse_table(soup)
 
-    def save_secciones(
-        self, data: list[SeccionSiiau], calendario_id: int, centro_id: int
-    ) -> dict[str, int]:
-        errors = []
-        secciones_creadas = 0
-        materias_creadas = 0
-        profesores_creados = 0
-        edificios_creados = 0
-        aulas_creadas = 0
-        clases_creadas = 0
-
-        for i in data:
-            d = SeccionSiiau(**i)
-            if not d.NRC or d.NRC == "":
-                errors.append(ConflictException("NRC is null"))
-                continue
-
-            _, secciones = self.seccion_service.list_secciones(
-                nrc=d.NRC, calendario_id=calendario_id
+    def _get_or_create_materia(
+        self, clave: str, nombre: str, creditos: int
+    ) -> tuple[Any, bool]:
+        """Get existing materia or create new one. Returns (materia, created)"""
+        materias_db, count = self.materia_service.list_materias(clave=clave)
+        if count == 0:
+            materia = self.materia_service.create_materia(
+                MateriaCreate(name=nombre, creditos=creditos, clave=clave)
             )
+            return materia, True
+        return materias_db[0], False
 
-            if secciones != 0:
-                errors.append(
-                    ConflictException("NRC already in use in that Calendario")
+    def _get_or_create_profesor(self, nombre: str) -> tuple[Any, bool]:
+        """Get existing profesor or create new one. Returns (profesor, created)"""
+        profesores_db, count = self.profesor_service.list_profesores(name=nombre)
+        if count == 0:
+            profesor = self.profesor_service.create_profesor(
+                ProfesorCreate(name=nombre)
+            )
+            return profesor, True
+        return profesores_db[0], False
+
+    def _get_or_create_edificio(self, nombre: str, centro_id: int) -> tuple[Any, bool]:
+        """Get existing edificio or create new one. Returns (edificio, created)"""
+        edificios_db, count = self.edificio_service.list_edificios(
+            name=nombre, centro_id=centro_id
+        )
+        if count == 0:
+            edificio = self.edificio_service.create_edificio(
+                EdificioCreate(name=nombre, centro_id=centro_id)
+            )
+            return edificio, True
+        return edificios_db[0], False
+
+    def _get_or_create_aula(self, nombre: str, edificio_id: int) -> tuple[Any, bool]:
+        """Get existing aula or create new one. Returns (aula, created)"""
+        aulas_db, count = self.aula_service.list_aulas(
+            name=nombre, edificio_id=edificio_id
+        )
+        if count == 0:
+            aula = self.aula_service.create_aula(
+                AulaCreate(name=nombre, edificio_id=edificio_id)
+            )
+            return aula, True
+        return aulas_db[0], False
+
+    def _parse_periodo(
+        self, periodo_str: Optional[str]
+    ) -> tuple[Optional[datetime], Optional[datetime]]:
+        """Parse periodo string into start and end dates"""
+        if not periodo_str or periodo_str == "":
+            return None, None
+        inicio_str, fin_str = periodo_str.split(" - ")
+        periodo_inicio = datetime.strptime(inicio_str, "%d/%m/%y")
+        periodo_fin = datetime.strptime(fin_str, "%d/%m/%y")
+        return periodo_inicio, periodo_fin
+
+    def _parse_horas(
+        self, horas_str: Optional[str]
+    ) -> tuple[Optional[time], Optional[time]]:
+        """Parse horas string into start and end times"""
+        if not horas_str or horas_str == "":
+            return None, None
+        inicio_str, fin_str = horas_str.split("-")
+        hora_inicio = time(int(inicio_str[:2]), int(inicio_str[2:]))
+        hora_fin = time(int(fin_str[:2]), int(fin_str[2:]))
+        return hora_inicio, hora_fin
+
+    def _parse_dias(self, dias_str: Optional[str]) -> list[int]:
+        """Parse dias string into list of day numbers"""
+        if not dias_str or dias_str == "":
+            return [0]
+        valores = dias_str.split()
+        return [i + 1 for i, dia in enumerate(valores) if dia != "."]
+
+    def _validate_seccion_data(self, data: SeccionSiiau) -> Optional[str]:
+        """Validate required fields. Returns error message or None"""
+        if not data.NRC or data.NRC == "":
+            return "NRC is null"
+        if not data.Clave or data.Clave == "":
+            return "Clave is null"
+        if not data.Materia or data.Materia == "":
+            return "Materia is null"
+        if not data.Sec or data.Sec == "":
+            return "Sec is null"
+        return None
+
+    def _create_clases_for_seccion(
+        self, data: SeccionSiiau, seccion_id: int, aula_id: Optional[int]
+    ) -> int:
+        """Create clases for a seccion. Returns number of clases created"""
+        hora_inicio, hora_fin = self._parse_horas(data.Horas)
+        dias = self._parse_dias(data.Dias)
+
+        clases_creadas = 0
+        for dia in dias:
+            self.clase_service.create_clase(
+                ClaseCreate(
+                    sesion=int(data.SesionNum) if data.SesionNum else None,
+                    hora_inicio=hora_inicio,
+                    hora_fin=hora_fin,
+                    dia=dia if dia != 0 else None,
+                    seccion_id=seccion_id,
+                    aula_id=aula_id,
                 )
-                continue
+            )
+            clases_creadas += 1
+        return clases_creadas
 
-            if not d.Clave or d.Clave == "":
-                errors.append(ConflictException("Clave is null"))
-                continue
+    def _process_seccion(
+        self,
+        data: SeccionSiiau,
+        calendario_id: int,
+        centro_id: int,
+        update_if_exists: bool = False,
+    ) -> dict:
+        """Process a single seccion. Returns stats dict"""
+        stats = {
+            "materias_creadas": 0,
+            "profesores_creados": 0,
+            "edificios_creados": 0,
+            "aulas_creadas": 0,
+            "clases_creadas": 0,
+            "secciones_creadas": 0,
+            "secciones_actualizadas": 0,
+            "error": None,
+        }
 
-            if not d.Materia or d.Materia == "":
-                errors.append(ConflictException("Materia is null"))
-                continue
+        # Validate data
+        error = self._validate_seccion_data(data)
+        if error:
+            stats["error"] = error
+            return stats
 
-            materias_db, materias = self.materia_service.list_materias(clave=d.Clave)
+        # Check if seccion exists
+        secciones_db, count = self.seccion_service.list_secciones(
+            nrc=data.NRC, calendario_id=calendario_id
+        )
+        seccion_exists = count > 0
 
-            if materias == 0:
-                materias_creadas += 1
-                materia = self.materia_service.create_materia(
-                    MateriaCreate(
-                        name=d.Materia,
-                        creditos=int(d.CR),
-                        clave=d.Clave,
-                    )
+        if seccion_exists and not update_if_exists:
+            stats["error"] = "NRC already in use in that Calendario"
+            return stats
+
+        # Get or create materia
+        materia, created = self._get_or_create_materia(
+            data.Clave, data.Materia, int(data.CR)
+        )
+        if created:
+            stats["materias_creadas"] += 1
+
+        # Get or create profesor
+        profesor = None
+        if data.Profesor and data.Profesor != "":
+            profesor, created = self._get_or_create_profesor(data.Profesor)
+            if created:
+                stats["profesores_creados"] += 1
+
+        # Parse periodo
+        periodo_inicio, periodo_fin = self._parse_periodo(data.Periodo)
+
+        # Create or update seccion
+        if seccion_exists:
+            seccion = secciones_db[0]
+            if seccion.id:
+                # Update only the fields that can change
+                update_data = SeccionUpdate(
+                    name=data.Sec,
+                    cupos=int(data.CUP),
+                    cupos_disponibles=int(data.DIS),
+                    periodo_inicio=periodo_inicio,
+                    periodo_fin=periodo_fin,
+                    materia_id=materia.id,
+                    profesor_id=profesor.id if profesor else None,
+                    nrc=None,  # NRC doesn't change
+                    centro_id=None,  # Centro doesn't change
+                    calendario_id=None,  # Calendario doesn't change
                 )
-            else:
-                materia = materias_db[0]
+                self.seccion_service.update_seccion(seccion.id, update_data)
+                stats["secciones_actualizadas"] += 1
 
-            if not d.Profesor or d.Profesor == "":
-                profesor = None
-            else:
-                profesores_db, profesores = self.profesor_service.list_profesores(
-                    name=d.Profesor
-                )
-
-                if profesores == 0:
-                    profesores_creados += 1
-                    profesor = self.profesor_service.create_profesor(
-                        ProfesorCreate(
-                            name=d.Profesor,
-                        )
-                    )
-                else:
-                    profesor = profesores_db[0]
-
-            if not d.Sec or d.Sec == "":
-                errors.append(ConflictException("Sec is null"))
-                continue
-
-            if not d.Periodo or d.Periodo == "":
-                periodo_inicio = None
-                periodo_fin = None
-            else:
-                inicio_str, fin_str = d.Periodo.split(" - ")
-                periodo_inicio = datetime.strptime(inicio_str, "%d/%m/%y")
-                periodo_fin = datetime.strptime(fin_str, "%d/%m/%y")
-
-            secciones_creadas += 1
+                # Delete existing clases for this seccion
+                clases_db, _ = self.clase_service.list_clases(seccion_id=seccion.id)
+                for clase in clases_db:
+                    if clase.id:
+                        self.clase_service.delete_clase(clase.id)
+        else:
             seccion = self.seccion_service.create_seccion(
                 SeccionCreate(
-                    name=d.Sec,
-                    nrc=d.NRC,
-                    cupos=int(d.CUP),
-                    cupos_disponibles=int(d.DIS),
+                    name=data.Sec,
+                    nrc=data.NRC,
+                    cupos=int(data.CUP),
+                    cupos_disponibles=int(data.DIS),
                     periodo_inicio=periodo_inicio,
                     periodo_fin=periodo_fin,
                     centro_id=centro_id,
@@ -239,85 +349,108 @@ class TasksService:
                     calendario_id=calendario_id,
                 )
             )
+            stats["secciones_creadas"] += 1
 
-            if not d.Edificio or d.Edificio == "":
-                edificio = None
-            else:
-                edificios_db, edificios = self.edificio_service.list_edificios(
-                    name=d.Edificio, centro_id=centro_id
-                )
+        # Get or create edificio and aula
+        edificio = None
+        aula = None
+        if data.Edificio and data.Edificio != "":
+            edificio, created = self._get_or_create_edificio(data.Edificio, centro_id)
+            if created:
+                stats["edificios_creados"] += 1
 
-                if edificios == 0:
-                    edificios_creados += 1
-                    edificio = self.edificio_service.create_edificio(
-                        EdificioCreate(
-                            name=d.Edificio,
-                            centro_id=centro_id,
-                        )
-                    )
-                else:
-                    edificio = edificios_db[0]
+            if data.Aula and data.Aula != "":
+                aula, created = self._get_or_create_aula(data.Aula, edificio.id)
+                if created:
+                    stats["aulas_creadas"] += 1
 
-            if not d.Aula or d.Aula == "":
-                aula = None
-            elif edificio:
-                aulas_db, aulas = self.aula_service.list_aulas(
-                    name=d.Aula, edificio_id=edificio.id
-                )
+        # Create clases
+        if seccion.id:
+            stats["clases_creadas"] = self._create_clases_for_seccion(
+                data, seccion.id, aula.id if aula else None
+            )
 
-                if aulas == 0:
-                    aulas_creadas += 1
-                    aula = self.aula_service.create_aula(
-                        AulaCreate(name=d.Aula, edificio_id=edificio.id)
-                    )
-                else:
-                    aula = aulas_db[0]
-            else:
-                aula = None
+        return stats
 
-            if not d.Horas or d.Horas == "":
-                hora_inicio = None
-                hora_fin = None
-            else:
-                inicio_str, fin_str = d.Horas.split("-")
-                hora_inicio = time(int(inicio_str[:2]), int(inicio_str[2:]))
-                hora_fin = time(int(fin_str[:2]), int(fin_str[2:]))
-
-            if not d.Dias or d.Dias == "":
-                dias = [0]
-            else:
-                valores = d.Dias.split()
-                dias = [i + 1 for i, dia in enumerate(valores) if dia != "."]
-
-            for dia in dias:
-                # try:
-                clases_creadas += 1
-                self.clase_service.create_clase(
-                    ClaseCreate(
-                        sesion=int(d.SesionNum) if d.SesionNum else None,
-                        hora_inicio=hora_inicio,
-                        hora_fin=hora_fin,
-                        dia=dia if dia != 0 else None,
-                        seccion_id=seccion.id,
-                        aula_id=aula.id if aula else None,
-                    )
-                )
-                # except Exception as e:
-                #     errors.append(e)
-
-        return {
-            "secciones_creadas": secciones_creadas,
-            "materias_creadas": materias_creadas,
-            "profesores_creados": profesores_creados,
-            "edificios_creados": edificios_creados,
-            "aulas_creadas": aulas_creadas,
-            "clases_creadas": clases_creadas,
-            "errores": len(errors),
+    def save_secciones(
+        self,
+        data: list[dict],
+        calendario_id: int,
+        centro_id: int,
+        update_if_exists: bool = False,
+    ) -> dict[str, int]:
+        """Save or update secciones from SIIAU data"""
+        total_stats = {
+            "secciones_creadas": 0,
+            "secciones_actualizadas": 0,
+            "materias_creadas": 0,
+            "profesores_creados": 0,
+            "edificios_creados": 0,
+            "aulas_creadas": 0,
+            "clases_creadas": 0,
+            "errores": 0,
         }
 
-    def get_secciones(self, calendario_id: int, centro_id: int):
+        for item in data:
+            d = SeccionSiiau(**item)
+            stats = self._process_seccion(d, calendario_id, centro_id, update_if_exists)
+
+            if stats["error"]:
+                total_stats["errores"] += 1
+            else:
+                for key in [
+                    "secciones_creadas",
+                    "secciones_actualizadas",
+                    "materias_creadas",
+                    "profesores_creados",
+                    "edificios_creados",
+                    "aulas_creadas",
+                    "clases_creadas",
+                ]:
+                    total_stats[key] += stats[key]
+
+        return total_stats
+
+    def get_secciones(
+        self, calendario_id: int, centro_id: int, update_existing: bool = False
+    ):
+        """
+        Fetch and save secciones from SIIAU.
+
+        Args:
+            calendario_id: ID of the calendario
+            centro_id: ID of the centro universitario
+            update_existing: If True, updates existing secciones instead of skipping them
+
+        Returns:
+            Dictionary with statistics of the operation
+        """
         calendario = self.calendario_service.get_calendario(calendario_id)
         centro = self.centro_service.get_centro(centro_id)
 
+        if not calendario.id or not centro.id:
+            raise NotFoundException("Calendario or Centro not found")
+
+        # Single request to SIIAU for all secciones
         secciones = self.make_request(calendario.siiau_id, centro.siiau_id)
-        return self.save_secciones(secciones, calendario.id, centro.id)
+
+        # Process all secciones with update flag
+        return self.save_secciones(
+            secciones, calendario.id, centro.id, update_if_exists=update_existing
+        )
+
+    def update_all_secciones(
+        self, calendario_id: int, centro_id: int
+    ) -> dict[str, int]:
+        """
+        Update all existing secciones with fresh data from SIIAU.
+        Makes a single request and updates all matching NRCs.
+
+        Args:
+            calendario_id: ID of the calendario
+            centro_id: ID of the centro universitario
+
+        Returns:
+            Dictionary with statistics of the operation
+        """
+        return self.get_secciones(calendario_id, centro_id, update_existing=True)

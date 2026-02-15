@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 
 from app.api.dependencies.auth import user_is_staff
 from app.api.schemas import Pagination
@@ -34,7 +34,7 @@ async def list_aulas(
     name: str | None = None,
     search: str | None = None,
     skip: int = 0,
-    limit: int = 100,
+    limit: int = Query(default=100, ge=1, le=100),
     service: AulaService = Depends(get_aula_service),
 ):
     aulas, total = service.list_aulas(

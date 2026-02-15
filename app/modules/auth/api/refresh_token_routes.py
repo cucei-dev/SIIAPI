@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 
 from app.api.dependencies.auth import user_is_superuser
 from app.api.schemas import Pagination
@@ -32,7 +32,7 @@ async def get_refresh_token(
 @router.get("/", response_model=Pagination[RefreshTokenRead])
 async def list_refresh_tokens(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = Query(default=100, ge=1, le=100),
     service: RefreshTokenService = Depends(get_refresh_token_service),
     user: User = Depends(user_is_superuser),
 ):
