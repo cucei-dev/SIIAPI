@@ -1,4 +1,5 @@
 from sqlmodel import SQLModel
+from pydantic import field_validator
 
 class CentroUniversitarioBase(SQLModel):
     name: str
@@ -17,3 +18,11 @@ class CentroUniversitarioReadMinimal(CentroUniversitarioBase):
 class CentroUniversitarioRead(CentroUniversitarioReadMinimal):
     secciones: list["SeccionReadMinimal"]
     edificios: list["EdificioReadMinimal"]
+    
+    @field_validator('secciones', 'edificios', mode='before')
+    @classmethod
+    def limit_lists(cls, v):
+        """Limit the number of items returned to a maximum of 10"""
+        if isinstance(v, list) and len(v) > 10:
+            return v[:10]
+        return v
