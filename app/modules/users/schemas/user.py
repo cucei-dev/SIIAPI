@@ -14,7 +14,6 @@ class UserBase(SQLModel):
     is_2fa_enabled: bool = False
     quit_tax: bool = False
     quit_comission: bool = False
-    credits: float = 0.0
 
 
 class UserCreate(UserBase):
@@ -45,7 +44,6 @@ class UserUpdate(UserAllowedUpdate):
     is_staff: bool | None = None
     quit_tax: bool | None = None
     quit_comission: bool | None = None
-    credits: float | None = None
 
 
 class UserAllowedCreate(SQLModel):

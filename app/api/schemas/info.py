@@ -1,5 +1,7 @@
 from pydantic import BaseModel
+
 from app.core.config import settings
+
 
 class Info(BaseModel):
     status: str = "ok"

@@ -88,8 +88,7 @@ El seed actual crea:
     "email": "admin@example.com",
     "password": "admin",
     "is_active": True,
-    "is_superuser": True,
-    "credits": 100
+    "is_superuser": True
 }
 ```
 
@@ -126,7 +125,6 @@ def create_superuser(session):
                 password="admin",
                 is_active=True,
                 is_superuser=True,
-                credits=100,
             )
         )
 

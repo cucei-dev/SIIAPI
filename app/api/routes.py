@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from app.api.schemas import Info
 from app.modules.aula.api.routes import router as aulas_router
 from app.modules.auth.api.routes import router as auth_router
 from app.modules.calendario.api.routes import router as calendarios_router
@@ -11,13 +12,14 @@ from app.modules.profesor.api.routes import router as profesores_router
 from app.modules.seccion.api.routes import router as secciones_router
 from app.modules.tasks.api.routes import router as tasks_router
 from app.modules.users.api.routes import router as users_router
-from app.api.schemas import Info
 
 router = APIRouter()
+
 
 @router.get("/", response_model=Info)
 async def get_info():
     return Info()
+
 
 router.include_router(calendarios_router, prefix="/calendarios", tags=["Calendarios"])
 router.include_router(
