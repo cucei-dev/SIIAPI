@@ -44,8 +44,6 @@ class AuthService:
         return self.create_tokens(
             login_data=data,
             user=user,
-            temporary=user.is_2fa_enabled,
-            refresh=not user.is_2fa_enabled,
         )
 
     def create_tokens(
