@@ -28,6 +28,9 @@ class Settings:
     APP_VERSION: str = "0.0.1"
     APP_DESCRIPTION: str = os.getenv("APP_DESCRIPTION")
     APP_DEBUG: bool = get_bool(os.getenv("APP_DEBUG", "true"))
+    
+    # Database seeding - set to true to run seed data on startup (production)
+    DB_SEED_ON_STARTUP: bool = get_bool(os.getenv("DB_SEED_ON_STARTUP", "false"))
 
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key")
     DUMMY_HASH: str = os.getenv("DUMMY_HASH")

@@ -6,8 +6,10 @@ This document explains how database migrations are handled in the SIIAPI project
 
 The project uses **Alembic** for database schema migrations in production environments. The migration strategy differs based on the `APP_DEBUG` environment variable:
 
-- **Development Mode** (`APP_DEBUG=True`): Uses SQLModel's `create_all()` for rapid development
+- **Development Mode** (`APP_DEBUG=True`): Uses SQLModel's `create_all()` for rapid development + automatic seed data
 - **Production Mode** (`APP_DEBUG=False`): Uses Alembic migrations for controlled schema changes
+
+> **📝 Note:** For information about seeding the database with initial data, see [SEEDING.md](./SEEDING.md)
 
 ## Architecture
 

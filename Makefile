@@ -64,10 +64,12 @@ dev:
 	uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 db-init:
+	@echo "Initializing database schema (development only)..."
 	python -c "from app.core.database import init_db; init_db()"
 
 db-seed:
-	python -c "from app.core.seed import seed_data; seed_data()"
+	@echo "Seeding database with initial data..."
+	python scripts/seed_database.py
 
 # Alembic migration commands
 migrate:

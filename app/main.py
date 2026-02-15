@@ -18,6 +18,10 @@ async def lifespan(app: FastAPI):
     else:
         # In production, use Alembic migrations
         run_migrations()
+        
+        # Optionally seed data in production if DB_SEED_ON_STARTUP is True
+        if settings.DB_SEED_ON_STARTUP:
+            seed_data()
     yield
 
 
