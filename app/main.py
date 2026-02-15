@@ -7,7 +7,7 @@ from app.core.config import settings
 from app.core.database import init_db
 from app.core.migrations import run_migrations
 from app.core.seed import seed_data
-
+from app.api.schemas import Info
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -31,5 +31,9 @@ app = FastAPI(
     description=settings.APP_DESCRIPTION,
     lifespan=lifespan,
 )
+
+@app.get("/", response_model=Info)
+async def get_info():
+    return Info()
 
 app.include_router(api_router, prefix="/api")
