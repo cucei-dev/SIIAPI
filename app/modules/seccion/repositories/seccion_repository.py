@@ -1,5 +1,7 @@
-from sqlmodel import Session, select, func, or_
+from sqlmodel import Session, func, or_, select
+
 from app.modules.seccion.models import Seccion
+
 
 class SeccionRepository:
     def __init__(self, session: Session):
@@ -25,19 +27,29 @@ class SeccionRepository:
 
         if filters.get("centro_id") is not None:
             statement = statement.where(Seccion.centro_id == filters["centro_id"])
-            total_statement = total_statement.where(Seccion.centro_id == filters["centro_id"])
+            total_statement = total_statement.where(
+                Seccion.centro_id == filters["centro_id"]
+            )
 
         if filters.get("materia_id") is not None:
             statement = statement.where(Seccion.materia_id == filters["materia_id"])
-            total_statement = total_statement.where(Seccion.materia_id == filters["materia_id"])
+            total_statement = total_statement.where(
+                Seccion.materia_id == filters["materia_id"]
+            )
 
         if filters.get("profesor_id") is not None:
             statement = statement.where(Seccion.profesor_id == filters["profesor_id"])
-            total_statement = total_statement.where(Seccion.profesor_id == filters["profesor_id"])
+            total_statement = total_statement.where(
+                Seccion.profesor_id == filters["profesor_id"]
+            )
 
         if filters.get("calendario_id") is not None:
-            statement = statement.where(Seccion.calendario_id == filters["calendario_id"])
-            total_statement = total_statement.where(Seccion.calendario_id == filters["calendario_id"])
+            statement = statement.where(
+                Seccion.calendario_id == filters["calendario_id"]
+            )
+            total_statement = total_statement.where(
+                Seccion.calendario_id == filters["calendario_id"]
+            )
 
         if filters.get("search"):
             search = f"%{filters['search']}%"
@@ -52,7 +64,9 @@ class SeccionRepository:
                 )
             )
 
-        statement = statement.offset(filters.get("skip", 0)).limit(filters.get("limit", 100))
+        statement = statement.offset(filters.get("skip", 0)).limit(
+            filters.get("limit", 100)
+        )
         secciones = self.session.exec(statement).all()
         total = self.session.exec(total_statement).one()
 

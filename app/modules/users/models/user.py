@@ -1,6 +1,8 @@
 from datetime import datetime
-from sqlmodel import SQLModel, Field, Relationship
+
 from pydantic import ConfigDict
+from sqlmodel import Field, Relationship, SQLModel
+
 
 class User(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -16,6 +18,8 @@ class User(SQLModel, table=True):
     is_superuser: bool = Field(default=False)
     is_staff: bool = Field(default=False)
 
-    refresh_tokens: list["RefreshToken"] = Relationship(back_populates="user", cascade_delete=True)
+    refresh_tokens: list["RefreshToken"] = Relationship(
+        back_populates="user", cascade_delete=True
+    )
 
     model_config = ConfigDict(from_attributes=True)

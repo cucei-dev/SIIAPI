@@ -2,9 +2,11 @@
 Generic unit tests template for other modules (aula, calendario, centro, etc.)
 This file serves as a template for testing other modules in the project.
 """
+
+from unittest.mock import Mock
+
 import pytest
 from sqlmodel import Session
-from unittest.mock import Mock
 
 # Example for testing a generic module (can be adapted for aula, calendario, centro, etc.)
 
@@ -134,6 +136,7 @@ class TestGenericAPI:
 
 # Specific module test examples
 
+
 @pytest.mark.unit
 class TestAulaModule:
     """Example tests for Aula (Classroom) module"""
@@ -142,7 +145,7 @@ class TestAulaModule:
         """Test creating an aula with valid data"""
         # from app.modules.aula.models import Aula
         # from app.modules.aula.repositories import AulaRepository
-        # 
+        #
         # repository = AulaRepository(session)
         # aula = Aula(
         #     nombre="Aula 101",
@@ -229,6 +232,7 @@ class TestEdificioModule:
 
 # Performance tests example
 
+
 @pytest.mark.slow
 class TestPerformance:
     """Performance tests for database operations"""
@@ -245,6 +249,7 @@ class TestPerformance:
 
 
 # Edge cases and error handling
+
 
 @pytest.mark.unit
 class TestEdgeCases:

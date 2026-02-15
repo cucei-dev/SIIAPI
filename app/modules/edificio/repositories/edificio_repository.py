@@ -1,5 +1,7 @@
-from sqlmodel import Session, select, func, or_
+from sqlmodel import Session, func, or_, select
+
 from app.modules.edificio.models import Edificio
+
 
 class EdificioRepository:
     def __init__(self, session: Session):
@@ -21,7 +23,9 @@ class EdificioRepository:
 
         if filters.get("centro_id") is not None:
             statement = statement.where(Edificio.centro_id == filters["centro_id"])
-            total_statement = total_statement.where(Edificio.centro_id == filters["centro_id"])
+            total_statement = total_statement.where(
+                Edificio.centro_id == filters["centro_id"]
+            )
 
         if filters.get("name") is not None:
             statement = statement.where(Edificio.name == filters["name"])
@@ -40,7 +44,9 @@ class EdificioRepository:
                 )
             )
 
-        statement = statement.offset(filters.get("skip", 0)).limit(filters.get("limit", 100))
+        statement = statement.offset(filters.get("skip", 0)).limit(
+            filters.get("limit", 100)
+        )
         edificios = self.session.exec(statement).all()
         total = self.session.exec(total_statement).one()
 

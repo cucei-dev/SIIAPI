@@ -1,7 +1,9 @@
-from app.modules.profesor.repositories.profesor_repository import ProfesorRepository
-from app.modules.profesor.schemas import ProfesorCreate, ProfesorUpdate
+from app.core.exceptions import ConflictException, NotFoundException
 from app.modules.profesor.models import Profesor
-from app.core.exceptions import NotFoundException, ConflictException
+from app.modules.profesor.repositories.profesor_repository import \
+    ProfesorRepository
+from app.modules.profesor.schemas import ProfesorCreate, ProfesorUpdate
+
 
 class ProfesorService:
     def __init__(
@@ -12,7 +14,7 @@ class ProfesorService:
 
     def create_profesor(self, data: ProfesorCreate) -> Profesor:
         profesor = Profesor.model_validate(data)
-        _,total = self.repository.list({"name": profesor.name})
+        _, total = self.repository.list({"name": profesor.name})
 
         if total != 0:
             raise ConflictException("Profesor with that name already exists.")

@@ -1,10 +1,18 @@
-from .refresh_token_service import RefreshTokenService
-from app.modules.users.repositories.user_repository import UserRepository
-from app.modules.auth.schemas import LoginData, LoginResponse, RefreshTokenData, AccessTokenData, Token, RefreshTokenCreate, RefreshTokenRequest
-from app.core.security import verify_password, create_access_token, create_refresh_token, check_token
-from app.core.exceptions import UnauthorizedException, ForbiddenException, BadRequestException
 from datetime import datetime
+
+from app.core.exceptions import (BadRequestException, ForbiddenException,
+                                 UnauthorizedException)
+from app.core.security import (check_token, create_access_token,
+                               create_refresh_token, verify_password)
+from app.modules.auth.schemas import (AccessTokenData, LoginData,
+                                      LoginResponse, RefreshTokenCreate,
+                                      RefreshTokenData, RefreshTokenRequest,
+                                      Token)
 from app.modules.users.models import User
+from app.modules.users.repositories.user_repository import UserRepository
+
+from .refresh_token_service import RefreshTokenService
+
 
 class AuthService:
     def __init__(
@@ -46,14 +54,14 @@ class AuthService:
         user: User,
         temporary: bool = False,
         refresh: bool = True,
-        refresh_token: Token | None = None
+        refresh_token: Token | None = None,
     ) -> LoginResponse:
         if refresh and not refresh_token:
             refresh_token = create_refresh_token(
                 RefreshTokenData(
                     sub=user.email,
                 ),
-                remember_me=login_data.remember_me
+                remember_me=login_data.remember_me,
             )
 
             refresh_token_data = RefreshTokenCreate(
@@ -65,7 +73,6 @@ class AuthService:
                 user_agent=login_data.user_agent,
                 ip_address=login_data.ip_address,
             )
-
 
             self.refresh_token_service.create_refresh_token(refresh_token_data)
 
@@ -98,7 +105,10 @@ class AuthService:
         if not refresh_token.is_active:
             raise UnauthorizedException("Refresh token is inactive.")
 
-        if refresh_token.user_agent != data.user_agent or refresh_token.ip_address != data.ip_address:
+        if (
+            refresh_token.user_agent != data.user_agent
+            or refresh_token.ip_address != data.ip_address
+        ):
             raise UnauthorizedException("Refresh token is invalid.")
 
         if refresh_token.expires_at < datetime.now():

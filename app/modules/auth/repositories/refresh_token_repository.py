@@ -1,6 +1,9 @@
-from sqlmodel import Session, select, func
-from app.modules.auth.models import RefreshToken
 from datetime import datetime
+
+from sqlmodel import Session, func, select
+
+from app.modules.auth.models import RefreshToken
+
 
 class RefreshTokenRepository:
     def __init__(self, session: Session):
@@ -22,37 +25,59 @@ class RefreshTokenRepository:
 
         if filters.get("user_id"):
             statement = statement.where(RefreshToken.user_id == filters["user_id"])
-            total_statement = total_statement.where(RefreshToken.user_id == filters["user_id"])
+            total_statement = total_statement.where(
+                RefreshToken.user_id == filters["user_id"]
+            )
 
         if filters.get("jti"):
             statement = statement.where(RefreshToken.jti == filters["jti"])
             total_statement = total_statement.where(RefreshToken.jti == filters["jti"])
 
         if filters.get("token_hash"):
-            statement = statement.where(RefreshToken.token_hash == filters["token_hash"])
-            total_statement = total_statement.where(RefreshToken.token_hash == filters["token_hash"])
+            statement = statement.where(
+                RefreshToken.token_hash == filters["token_hash"]
+            )
+            total_statement = total_statement.where(
+                RefreshToken.token_hash == filters["token_hash"]
+            )
 
         if filters.get("expired") is not None:
             if filters["expired"]:
                 statement = statement.where(RefreshToken.expires_at < datetime.now())
-                total_statement = total_statement.where(RefreshToken.expires_at < datetime.now())
+                total_statement = total_statement.where(
+                    RefreshToken.expires_at < datetime.now()
+                )
             else:
                 statement = statement.where(RefreshToken.expires_at > datetime.now())
-                total_statement = total_statement.where(RefreshToken.expires_at > datetime.now())
+                total_statement = total_statement.where(
+                    RefreshToken.expires_at > datetime.now()
+                )
 
         if filters.get("is_active") is not None:
             statement = statement.where(RefreshToken.is_active == filters["is_active"])
-            total_statement = total_statement.where(RefreshToken.is_active == filters["is_active"])
+            total_statement = total_statement.where(
+                RefreshToken.is_active == filters["is_active"]
+            )
 
         if filters.get("user_agent"):
-            statement = statement.where(RefreshToken.user_agent == filters["user_agent"])
-            total_statement = total_statement.where(RefreshToken.user_agent == filters["user_agent"])
+            statement = statement.where(
+                RefreshToken.user_agent == filters["user_agent"]
+            )
+            total_statement = total_statement.where(
+                RefreshToken.user_agent == filters["user_agent"]
+            )
 
         if filters.get("ip_address"):
-            statement = statement.where(RefreshToken.ip_address == filters["ip_address"])
-            total_statement = total_statement.where(RefreshToken.ip_address == filters["ip_address"])
+            statement = statement.where(
+                RefreshToken.ip_address == filters["ip_address"]
+            )
+            total_statement = total_statement.where(
+                RefreshToken.ip_address == filters["ip_address"]
+            )
 
-        statement = statement.offset(filters.get("skip", 0)).limit(filters.get("limit", 100))
+        statement = statement.offset(filters.get("skip", 0)).limit(
+            filters.get("limit", 100)
+        )
         refresh_tokens = self.session.exec(statement).all()
         total = self.session.exec(total_statement).one()
 

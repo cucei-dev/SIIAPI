@@ -1,12 +1,16 @@
 from fastapi import APIRouter, Depends, status
-from app.modules.materia.schemas import MateriaCreate, MateriaRead, MateriaUpdate
-from app.modules.materia.services.materia_service import MateriaService
-from .dependencies import get_materia_service
-from app.api.schemas import Pagination
+
 from app.api.dependencies.auth import user_is_staff
+from app.api.schemas import Pagination
+from app.modules.materia.schemas import (MateriaCreate, MateriaRead,
+                                         MateriaUpdate)
+from app.modules.materia.services.materia_service import MateriaService
 from app.modules.users.models import User
 
+from .dependencies import get_materia_service
+
 router = APIRouter()
+
 
 @router.post("/", response_model=MateriaRead, status_code=status.HTTP_201_CREATED)
 async def create_materia(
@@ -14,7 +18,8 @@ async def create_materia(
     service: MateriaService = Depends(get_materia_service),
     user: User = Depends(user_is_staff),
 ):
-        return service.create_materia(data)
+    return service.create_materia(data)
+
 
 @router.get("/{materia_id}", response_model=MateriaRead)
 async def get_materia(
@@ -23,6 +28,7 @@ async def get_materia(
     user: User = Depends(user_is_staff),
 ):
     return service.get_materia(materia_id)
+
 
 @router.get("/", response_model=Pagination[MateriaRead])
 async def list_materias(
@@ -44,6 +50,7 @@ async def list_materias(
         results=materias,
     )
 
+
 @router.put("/{materia_id}", response_model=MateriaRead)
 async def update_materia(
     materia_id: int,
@@ -53,6 +60,7 @@ async def update_materia(
 ):
     return service.update_materia(materia_id, data)
 
+
 @router.patch("/{materia_id}", response_model=MateriaRead)
 async def update_materia_partial(
     materia_id: int,
@@ -61,6 +69,7 @@ async def update_materia_partial(
     user: User = Depends(user_is_staff),
 ):
     return service.update_materia(materia_id, data)
+
 
 @router.delete("/{materia_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_materia(

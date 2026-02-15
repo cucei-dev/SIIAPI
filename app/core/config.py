@@ -1,8 +1,10 @@
-from dotenv import load_dotenv
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 load_dotenv()
+
 
 def get_bool(value, default=False):
     if value is None:
@@ -32,5 +34,6 @@ class Settings:
     ALGORITHM: str = "HS256"
 
     SIIAU_URL: str = os.getenv("SIIAU_URL")
+
 
 settings = Settings()

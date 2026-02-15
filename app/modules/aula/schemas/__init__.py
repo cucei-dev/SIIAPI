@@ -1,6 +1,7 @@
-from .aula import AulaBase, AulaCreate, AulaRead, AulaUpdate
-from app.modules.edificio.schemas.edificio import EdificioReadMinimal
 from app.modules.clase.schemas.clase import ClaseReadMinimal
+from app.modules.edificio.schemas.edificio import EdificioReadMinimal
+
+from .aula import AulaBase, AulaCreate, AulaRead, AulaUpdate
 
 AulaRead.model_rebuild()
 

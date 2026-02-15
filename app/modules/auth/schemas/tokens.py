@@ -1,5 +1,6 @@
 from sqlmodel import SQLModel
 
+
 class AccessTokenData(SQLModel):
     sub: str
     is_superuser: bool
@@ -12,12 +13,14 @@ class AccessTokenData(SQLModel):
     refresh_jti: str | None = None
     type: str = "access"
 
+
 class RefreshTokenData(SQLModel):
     sub: str
     iat: int | None = None
     exp: int | None = None
     jti: str | None = None
     type: str = "refresh"
+
 
 class Token(SQLModel):
     token: str

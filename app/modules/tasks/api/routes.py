@@ -1,10 +1,13 @@
 from fastapi import APIRouter, Depends
+
 from app.api.dependencies.auth import user_is_staff
-from app.modules.users.models import User
-from .dependencies import get_tasks_service
 from app.modules.tasks.services.task_service import TasksService
+from app.modules.users.models import User
+
+from .dependencies import get_tasks_service
 
 router = APIRouter()
+
 
 @router.get("/importar-secciones")
 async def importar_secciones(

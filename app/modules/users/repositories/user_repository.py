@@ -1,6 +1,9 @@
-from sqlmodel import Session, select, func, or_
-from app.modules.users.models import User
 from datetime import datetime
+
+from sqlmodel import Session, func, or_, select
+
+from app.modules.users.models import User
+
 
 class UserRepository:
     def __init__(self, session: Session):
@@ -26,15 +29,21 @@ class UserRepository:
 
         if filters.get("is_active") is not None:
             statement = statement.where(User.is_active == filters["is_active"])
-            total_statement = total_statement.where(User.is_active == filters["is_active"])
+            total_statement = total_statement.where(
+                User.is_active == filters["is_active"]
+            )
 
         if filters.get("is_superuser") is not None:
             statement = statement.where(User.is_superuser == filters["is_superuser"])
-            total_statement = total_statement.where(User.is_superuser == filters["is_superuser"])
+            total_statement = total_statement.where(
+                User.is_superuser == filters["is_superuser"]
+            )
 
         if filters.get("is_staff") is not None:
             statement = statement.where(User.is_staff == filters["is_staff"])
-            total_statement = total_statement.where(User.is_staff == filters["is_staff"])
+            total_statement = total_statement.where(
+                User.is_staff == filters["is_staff"]
+            )
 
         if filters.get("search"):
             search = f"%{filters['search']}%"
@@ -51,7 +60,9 @@ class UserRepository:
                 )
             )
 
-        statement = statement.offset(filters.get("skip", 0)).limit(filters.get("limit", 100))
+        statement = statement.offset(filters.get("skip", 0)).limit(
+            filters.get("limit", 100)
+        )
         users = self.session.exec(statement).all()
         total = self.session.exec(total_statement).one()
 

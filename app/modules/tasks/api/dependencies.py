@@ -1,22 +1,26 @@
-from app.modules.tasks.services.task_service import TasksService
 from fastapi import Depends
-from app.modules.centro.services.centro_service import CentroUniversitarioService
-from app.modules.centro.api.dependencies import get_centro_service
-from app.modules.calendario.services.calendario_service import CalendarioService
-from app.modules.calendario.api.dependencies import get_calendario_service
-from app.modules.materia.services.materia_service import MateriaService
-from app.modules.materia.api.dependencies import get_materia_service
-from app.modules.profesor.services.profesor_service import ProfesorService
-from app.modules.profesor.api.dependencies import get_profesor_service
-from app.modules.edificio.services.edificio_service import EdificioService
-from app.modules.edificio.api.dependencies import get_edificio_service
-from app.modules.seccion.services.seccion_service import SeccionService
-from app.modules.seccion.api.dependencies import get_seccion_service
-from app.modules.aula.services.aula_service import AulaService
+
 from app.modules.aula.api.dependencies import get_aula_service
-from app.modules.clase.services.clase_service import ClaseService
+from app.modules.aula.services.aula_service import AulaService
+from app.modules.calendario.api.dependencies import get_calendario_service
+from app.modules.calendario.services.calendario_service import \
+    CalendarioService
+from app.modules.centro.api.dependencies import get_centro_service
+from app.modules.centro.services.centro_service import \
+    CentroUniversitarioService
 from app.modules.clase.api.dependencies import get_clase_service
+from app.modules.clase.services.clase_service import ClaseService
+from app.modules.edificio.api.dependencies import get_edificio_service
+from app.modules.edificio.services.edificio_service import EdificioService
+from app.modules.materia.api.dependencies import get_materia_service
+from app.modules.materia.services.materia_service import MateriaService
+from app.modules.profesor.api.dependencies import get_profesor_service
+from app.modules.profesor.services.profesor_service import ProfesorService
+from app.modules.seccion.api.dependencies import get_seccion_service
+from app.modules.seccion.services.seccion_service import SeccionService
 from app.modules.tasks.schemas.siiau import SeccionSiiau
+from app.modules.tasks.services.task_service import TasksService
+
 
 def get_tasks_service(
     centro_service: CentroUniversitarioService = Depends(get_centro_service),

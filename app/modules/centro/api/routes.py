@@ -1,20 +1,29 @@
 from fastapi import APIRouter, Depends, status
-from app.modules.centro.schemas import CentroUniversitarioCreate, CentroUniversitarioRead, CentroUniversitarioUpdate
-from app.modules.centro.services.centro_service import CentroUniversitarioService
-from .dependencies import get_centro_service
-from app.api.schemas import Pagination
+
 from app.api.dependencies.auth import user_is_staff
+from app.api.schemas import Pagination
+from app.modules.centro.schemas import (CentroUniversitarioCreate,
+                                        CentroUniversitarioRead,
+                                        CentroUniversitarioUpdate)
+from app.modules.centro.services.centro_service import \
+    CentroUniversitarioService
 from app.modules.users.models import User
+
+from .dependencies import get_centro_service
 
 router = APIRouter()
 
-@router.post("/", response_model=CentroUniversitarioRead, status_code=status.HTTP_201_CREATED)
+
+@router.post(
+    "/", response_model=CentroUniversitarioRead, status_code=status.HTTP_201_CREATED
+)
 async def create_centro(
     data: CentroUniversitarioCreate,
     service: CentroUniversitarioService = Depends(get_centro_service),
     user: User = Depends(user_is_staff),
 ):
-        return service.create_centro(data)
+    return service.create_centro(data)
+
 
 @router.get("/{centro_id}", response_model=CentroUniversitarioRead)
 async def get_centro(
@@ -23,6 +32,7 @@ async def get_centro(
     user: User = Depends(user_is_staff),
 ):
     return service.get_centro(centro_id)
+
 
 @router.get("/", response_model=Pagination[CentroUniversitarioRead])
 async def list_centros(
@@ -44,6 +54,7 @@ async def list_centros(
         results=centros,
     )
 
+
 @router.put("/{centro_id}", response_model=CentroUniversitarioRead)
 async def update_centro(
     centro_id: int,
@@ -53,6 +64,7 @@ async def update_centro(
 ):
     return service.update_centro(centro_id, data)
 
+
 @router.patch("/{centro_id}", response_model=CentroUniversitarioRead)
 async def update_centro_partial(
     centro_id: int,
@@ -61,6 +73,7 @@ async def update_centro_partial(
     user: User = Depends(user_is_staff),
 ):
     return service.update_centro(centro_id, data)
+
 
 @router.delete("/{centro_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_centro(

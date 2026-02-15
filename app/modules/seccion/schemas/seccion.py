@@ -1,7 +1,9 @@
-from sqlmodel import SQLModel
 from datetime import datetime
 from typing import Optional
+
 from pydantic import field_validator
+from sqlmodel import SQLModel
+
 
 class SeccionBase(SQLModel):
     name: str
@@ -15,8 +17,10 @@ class SeccionBase(SQLModel):
     profesor_id: int | None
     calendario_id: int
 
+
 class SeccionCreate(SeccionBase):
     pass
+
 
 class SeccionUpdate(SQLModel):
     name: str | None
@@ -30,8 +34,10 @@ class SeccionUpdate(SQLModel):
     profesor_id: int | None
     calendario_id: int | None
 
+
 class SeccionReadMinimal(SeccionBase):
     id: int
+
 
 class SeccionRead(SeccionReadMinimal):
     centro: "CentroUniversitarioReadMinimal"
@@ -39,8 +45,8 @@ class SeccionRead(SeccionReadMinimal):
     profesor: Optional["ProfesorReadMinimal"]
     calendario: "CalendarioReadMinimal"
     clases: list["ClaseReadMinimal"]
-    
-    @field_validator('clases', mode='before')
+
+    @field_validator("clases", mode="before")
     @classmethod
     def limit_clases(cls, v):
         """Limit the number of clases returned to a maximum of 10"""

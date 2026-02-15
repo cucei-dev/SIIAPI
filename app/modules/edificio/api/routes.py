@@ -1,12 +1,16 @@
 from fastapi import APIRouter, Depends, status
-from app.modules.edificio.schemas import EdificioCreate, EdificioRead, EdificioUpdate
-from app.modules.edificio.services.edificio_service import EdificioService
-from .dependencies import get_edificio_service
-from app.api.schemas import Pagination
+
 from app.api.dependencies.auth import user_is_staff
+from app.api.schemas import Pagination
+from app.modules.edificio.schemas import (EdificioCreate, EdificioRead,
+                                          EdificioUpdate)
+from app.modules.edificio.services.edificio_service import EdificioService
 from app.modules.users.models import User
 
+from .dependencies import get_edificio_service
+
 router = APIRouter()
+
 
 @router.post("/", response_model=EdificioRead, status_code=status.HTTP_201_CREATED)
 async def create_edificio(
@@ -14,7 +18,8 @@ async def create_edificio(
     service: EdificioService = Depends(get_edificio_service),
     user: User = Depends(user_is_staff),
 ):
-        return service.create_edificio(data)
+    return service.create_edificio(data)
+
 
 @router.get("/{edificio_id}", response_model=EdificioRead)
 async def get_edificio(
@@ -23,6 +28,7 @@ async def get_edificio(
     user: User = Depends(user_is_staff),
 ):
     return service.get_edificio(edificio_id)
+
 
 @router.get("/", response_model=Pagination[EdificioRead])
 async def list_edificios(
@@ -46,6 +52,7 @@ async def list_edificios(
         results=edificios,
     )
 
+
 @router.put("/{edificio_id}", response_model=EdificioRead)
 async def update_edificio(
     edificio_id: int,
@@ -55,6 +62,7 @@ async def update_edificio(
 ):
     return service.update_edificio(edificio_id, data)
 
+
 @router.patch("/{edificio_id}", response_model=EdificioRead)
 async def update_edificio_partial(
     edificio_id: int,
@@ -63,6 +71,7 @@ async def update_edificio_partial(
     user: User = Depends(user_is_staff),
 ):
     return service.update_edificio(edificio_id, data)
+
 
 @router.delete("/{edificio_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_edificio(

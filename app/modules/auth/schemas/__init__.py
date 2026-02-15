@@ -1,7 +1,9 @@
-from .refresh_token import RefreshTokenCreate, RefreshTokenRead, RefreshTokenUpdate
 from app.modules.users.schemas.user import UserReadMinimal
+
 from .auth import LoginData, LoginResponse, RefreshTokenRequest
-from .tokens import Token, RefreshTokenData, AccessTokenData
+from .refresh_token import (RefreshTokenCreate, RefreshTokenRead,
+                            RefreshTokenUpdate)
+from .tokens import AccessTokenData, RefreshTokenData, Token
 
 RefreshTokenRead.model_rebuild()
 

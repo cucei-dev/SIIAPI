@@ -1,5 +1,7 @@
-from sqlmodel import Session, select, func, or_
+from sqlmodel import Session, func, or_, select
+
 from app.modules.calendario.models import Calendario
+
 
 class CalendarioRepository:
     def __init__(self, session: Session):
@@ -21,7 +23,9 @@ class CalendarioRepository:
 
         if filters.get("siiau_id") is not None:
             statement = statement.where(Calendario.siiau_id == filters["siiau_id"])
-            total_statement = total_statement.where(Calendario.siiau_id == filters["siiau_id"])
+            total_statement = total_statement.where(
+                Calendario.siiau_id == filters["siiau_id"]
+            )
 
         if filters.get("search"):
             search = f"%{filters['search']}%"
@@ -36,7 +40,9 @@ class CalendarioRepository:
                 )
             )
 
-        statement = statement.offset(filters.get("skip", 0)).limit(filters.get("limit", 100))
+        statement = statement.offset(filters.get("skip", 0)).limit(
+            filters.get("limit", 100)
+        )
         calendarios = self.session.exec(statement).all()
         total = self.session.exec(total_statement).one()
 

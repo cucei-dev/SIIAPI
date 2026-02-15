@@ -1,8 +1,11 @@
-from fastapi import Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from app.core.security import check_token
 from datetime import datetime
-from app.core.exceptions import UnauthorizedException, NotFoundException, ForbiddenException
+
+from fastapi import Depends
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+from app.core.exceptions import (ForbiddenException, NotFoundException,
+                                 UnauthorizedException)
+from app.core.security import check_token
 from app.modules.auth.api.dependencies import get_refresh_token_service
 from app.modules.auth.services.refresh_token_service import RefreshTokenService
 from app.modules.users.models import User
@@ -10,23 +13,35 @@ from app.modules.users.models import User
 oauth2_scheme_strict = HTTPBearer()
 oauth2_scheme = HTTPBearer(auto_error=False)
 
-def user_is_superuser(access_token: HTTPAuthorizationCredentials = Depends(oauth2_scheme_strict), service: RefreshTokenService = Depends(get_refresh_token_service)) -> User:
-    user = get_current_user_strict(access_token,service)
+
+def user_is_superuser(
+    access_token: HTTPAuthorizationCredentials = Depends(oauth2_scheme_strict),
+    service: RefreshTokenService = Depends(get_refresh_token_service),
+) -> User:
+    user = get_current_user_strict(access_token, service)
 
     if not user.is_superuser:
         raise ForbiddenException("Not enough permissions.")
 
     return user
 
-def user_is_staff(access_token: HTTPAuthorizationCredentials = Depends(oauth2_scheme_strict), service: RefreshTokenService = Depends(get_refresh_token_service)) -> User:
-    user = get_current_user_strict(access_token,service)
+
+def user_is_staff(
+    access_token: HTTPAuthorizationCredentials = Depends(oauth2_scheme_strict),
+    service: RefreshTokenService = Depends(get_refresh_token_service),
+) -> User:
+    user = get_current_user_strict(access_token, service)
 
     if not user.is_staff:
         raise ForbiddenException("Not enough permissions.")
 
     return user
 
-def get_current_user_strict(access_token = Depends(oauth2_scheme_strict), service: RefreshTokenService = Depends(get_refresh_token_service)) -> User:
+
+def get_current_user_strict(
+    access_token=Depends(oauth2_scheme_strict),
+    service: RefreshTokenService = Depends(get_refresh_token_service),
+) -> User:
     user = get_current_user(access_token, service)
 
     if not user:
@@ -34,7 +49,11 @@ def get_current_user_strict(access_token = Depends(oauth2_scheme_strict), servic
 
     return user
 
-def get_current_user(access_token: HTTPAuthorizationCredentials = Depends(oauth2_scheme), service: RefreshTokenService = Depends(get_refresh_token_service)) -> User | None:
+
+def get_current_user(
+    access_token: HTTPAuthorizationCredentials = Depends(oauth2_scheme),
+    service: RefreshTokenService = Depends(get_refresh_token_service),
+) -> User | None:
     if not access_token:
         return None
 

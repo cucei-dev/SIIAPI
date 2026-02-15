@@ -1,5 +1,7 @@
-from .profesor import ProfesorBase, ProfesorCreate, ProfesorRead, ProfesorUpdate
 from app.modules.seccion.schemas.seccion import SeccionReadMinimal
+
+from .profesor import (ProfesorBase, ProfesorCreate, ProfesorRead,
+                       ProfesorUpdate)
 
 ProfesorRead.model_rebuild()
 

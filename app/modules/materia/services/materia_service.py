@@ -1,7 +1,9 @@
-from app.modules.materia.repositories.materia_repository import MateriaRepository
-from app.modules.materia.schemas import MateriaCreate, MateriaUpdate
+from app.core.exceptions import ConflictException, NotFoundException
 from app.modules.materia.models import Materia
-from app.core.exceptions import NotFoundException, ConflictException
+from app.modules.materia.repositories.materia_repository import \
+    MateriaRepository
+from app.modules.materia.schemas import MateriaCreate, MateriaUpdate
+
 
 class MateriaService:
     def __init__(
@@ -12,7 +14,7 @@ class MateriaService:
 
     def create_materia(self, data: MateriaCreate) -> Materia:
         materia = Materia.model_validate(data)
-        _,total = self.repository.list({"clave": materia.clave})
+        _, total = self.repository.list({"clave": materia.clave})
 
         if total != 0:
             raise ConflictException("Materia with that clave already exists.")

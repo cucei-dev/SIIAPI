@@ -1,9 +1,11 @@
+from app.core.exceptions import ConflictException, NotFoundException
+from app.modules.aula.repositories.aula_repository import AulaRepository
+from app.modules.clase.models import Clase
 from app.modules.clase.repositories.clase_repository import ClaseRepository
 from app.modules.clase.schemas import ClaseCreate, ClaseUpdate
-from app.modules.clase.models import Clase
-from app.core.exceptions import NotFoundException, ConflictException
-from app.modules.seccion.repositories.seccion_repository import SeccionRepository
-from app.modules.aula.repositories.aula_repository import AulaRepository
+from app.modules.seccion.repositories.seccion_repository import \
+    SeccionRepository
+
 
 class ClaseService:
     def __init__(
@@ -23,7 +25,7 @@ class ClaseService:
         if not seccion:
             raise NotFoundException("Sección not found.")
 
-        _,total = self.repository.list(
+        _, total = self.repository.list(
             {
                 "seccion_id": clase.seccion_id,
                 "aula_id": clase.aula_id,
@@ -34,11 +36,11 @@ class ClaseService:
         )
 
         if total != 0 and (
-            clase.seccion_id is not None and
-            clase.aula_id is not None and
-            clase.hora_inicio is not None and
-            clase.hora_fin is not None and
-            clase.dia is not None
+            clase.seccion_id is not None
+            and clase.aula_id is not None
+            and clase.hora_inicio is not None
+            and clase.hora_fin is not None
+            and clase.dia is not None
         ):
             raise ConflictException("A clase with same parameters already exists.")
         return self.repository.create(clase)

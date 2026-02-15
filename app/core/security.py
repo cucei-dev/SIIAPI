@@ -1,21 +1,29 @@
-from passlib.context import CryptContext
-from jose import jwt
-from datetime import datetime, timedelta
-from app.core.config import settings
-from app.modules.auth.schemas import Token, RefreshTokenData, AccessTokenData
 import uuid
-from ShieldCipher.encryption.symmetric import encrypt as sc_encrypt, decrypt as sc_decrypt
+from datetime import datetime, timedelta
+
+from jose import jwt
+from passlib.context import CryptContext
+from ShieldCipher.encryption.symmetric import decrypt as sc_decrypt
+from ShieldCipher.encryption.symmetric import encrypt as sc_encrypt
+
+from app.core.config import settings
+from app.modules.auth.schemas import AccessTokenData, RefreshTokenData, Token
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
-def verify_password(plain_password: str, hashed_password: str = settings.DUMMY_HASH) -> bool:
+
+def verify_password(
+    plain_password: str, hashed_password: str = settings.DUMMY_HASH
+) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
+
 def create_access_token(data: AccessTokenData) -> Token:
-    #now = datetime.now(timezone.utc)
+    # now = datetime.now(timezone.utc)
     now = datetime.now()
     expire = now + timedelta(days=1)
 
@@ -24,13 +32,16 @@ def create_access_token(data: AccessTokenData) -> Token:
     data.iss = settings.APP_SITE
     data.jti = str(uuid.uuid4())
 
-    JWT = jwt.encode(data.model_dump(), settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    JWT = jwt.encode(
+        data.model_dump(), settings.SECRET_KEY, algorithm=settings.ALGORITHM
+    )
     HASH = hash_password(JWT)
 
     return Token(token=JWT, data=data, hash=HASH)
 
+
 def create_refresh_token(data: RefreshTokenData) -> Token:
-    #now = datetime.now(timezone.utc)
+    # now = datetime.now(timezone.utc)
     now = datetime.now()
     expire = now + timedelta(days=1)
 
@@ -38,14 +49,22 @@ def create_refresh_token(data: RefreshTokenData) -> Token:
     data.iat = int(now.timestamp())
     data.jti = str(uuid.uuid4())
 
-    JWT = jwt.encode(data.model_dump(), settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    JWT = jwt.encode(
+        data.model_dump(), settings.SECRET_KEY, algorithm=settings.ALGORITHM
+    )
     HASH = hash_password(JWT)
 
     return Token(token=JWT, data=data, token_hash=HASH)
 
+
 def check_token(token: str, token_type: str) -> dict | None:
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM], audience=settings.APP_ENV)
+        payload = jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
+            audience=settings.APP_ENV,
+        )
         if payload.get("type") == token_type:
             return payload
         else:
@@ -53,9 +72,11 @@ def check_token(token: str, token_type: str) -> dict | None:
     except jwt.JWTError:
         return None
 
+
 def encrypt(message: str) -> str:
     encrypted_result = sc_encrypt(secret=settings.SECRET_KEY, message=message)
     return f"{encrypted_result[0]}${encrypted_result[1]}${encrypted_result[2].hex()}${encrypted_result[3].hex()}"
+
 
 def decrypt(encrypted_text: str, split="$") -> str:
     encrypted = encrypted_text.split(split)

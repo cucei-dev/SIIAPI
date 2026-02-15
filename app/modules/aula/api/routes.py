@@ -1,12 +1,15 @@
 from fastapi import APIRouter, Depends, status
+
+from app.api.dependencies.auth import user_is_staff
+from app.api.schemas import Pagination
 from app.modules.aula.schemas import AulaCreate, AulaRead, AulaUpdate
 from app.modules.aula.services.aula_service import AulaService
-from .dependencies import get_aula_service
-from app.api.schemas import Pagination
-from app.api.dependencies.auth import user_is_staff
 from app.modules.users.models import User
 
+from .dependencies import get_aula_service
+
 router = APIRouter()
+
 
 @router.post("/", response_model=AulaRead, status_code=status.HTTP_201_CREATED)
 async def create_aula(
@@ -14,7 +17,8 @@ async def create_aula(
     service: AulaService = Depends(get_aula_service),
     user: User = Depends(user_is_staff),
 ):
-        return service.create_aula(data)
+    return service.create_aula(data)
+
 
 @router.get("/{aula_id}", response_model=AulaRead)
 async def get_aula(
@@ -23,6 +27,7 @@ async def get_aula(
     user: User = Depends(user_is_staff),
 ):
     return service.get_aula(aula_id)
+
 
 @router.get("/", response_model=Pagination[AulaRead])
 async def list_aulas(
@@ -46,6 +51,7 @@ async def list_aulas(
         results=aulas,
     )
 
+
 @router.put("/{aula_id}", response_model=AulaRead)
 async def update_aula(
     aula_id: int,
@@ -55,6 +61,7 @@ async def update_aula(
 ):
     return service.update_aula(aula_id, data)
 
+
 @router.patch("/{aula_id}", response_model=AulaRead)
 async def update_aula_partial(
     aula_id: int,
@@ -63,6 +70,7 @@ async def update_aula_partial(
     user: User = Depends(user_is_staff),
 ):
     return service.update_aula(aula_id, data)
+
 
 @router.delete("/{aula_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_aula(

@@ -1,7 +1,9 @@
-from typing import Optional
 from datetime import datetime
-from sqlmodel import SQLModel
+from typing import Optional
+
 from pydantic import EmailStr
+from sqlmodel import SQLModel
+
 
 class UserBase(SQLModel):
     name: str
@@ -14,8 +16,10 @@ class UserBase(SQLModel):
     quit_comission: bool = False
     credits: float = 0.0
 
+
 class UserCreate(UserBase):
     password: str
+
 
 class UserAllowedUpdate(SQLModel):
     name: str | None = None
@@ -23,14 +27,17 @@ class UserAllowedUpdate(SQLModel):
     password: str | None = None
     is_2fa_enabled: bool | None = None
 
+
 class UserReadMinimal(UserBase):
     id: int
     created_at: datetime
     updated_at: datetime
     last_login: datetime | None = None
 
+
 class UserRead(UserReadMinimal):
     refresh_tokens: list["RefreshTokenReadMinimal"] = []
+
 
 class UserUpdate(UserAllowedUpdate):
     is_active: bool | None = None
@@ -39,6 +46,7 @@ class UserUpdate(UserAllowedUpdate):
     quit_tax: bool | None = None
     quit_comission: bool | None = None
     credits: float | None = None
+
 
 class UserAllowedCreate(SQLModel):
     name: str | None = None

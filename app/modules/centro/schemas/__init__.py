@@ -1,6 +1,8 @@
-from .centro import CentroUniversitarioBase, CentroUniversitarioCreate, CentroUniversitarioRead, CentroUniversitarioUpdate
-from app.modules.seccion.schemas.seccion import SeccionReadMinimal
 from app.modules.edificio.schemas.edificio import EdificioReadMinimal
+from app.modules.seccion.schemas.seccion import SeccionReadMinimal
+
+from .centro import (CentroUniversitarioBase, CentroUniversitarioCreate,
+                     CentroUniversitarioRead, CentroUniversitarioUpdate)
 
 CentroUniversitarioRead.model_rebuild()
 

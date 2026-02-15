@@ -1,12 +1,16 @@
 from fastapi import APIRouter, Depends, status
-from app.modules.seccion.schemas import SeccionCreate, SeccionRead, SeccionUpdate
-from app.modules.seccion.services.seccion_service import SeccionService
-from .dependencies import get_seccion_service
-from app.api.schemas import Pagination
+
 from app.api.dependencies.auth import user_is_staff
+from app.api.schemas import Pagination
+from app.modules.seccion.schemas import (SeccionCreate, SeccionRead,
+                                         SeccionUpdate)
+from app.modules.seccion.services.seccion_service import SeccionService
 from app.modules.users.models import User
 
+from .dependencies import get_seccion_service
+
 router = APIRouter()
+
 
 @router.post("/", response_model=SeccionRead, status_code=status.HTTP_201_CREATED)
 async def create_seccion(
@@ -14,7 +18,8 @@ async def create_seccion(
     service: SeccionService = Depends(get_seccion_service),
     user: User = Depends(user_is_staff),
 ):
-        return service.create_seccion(data)
+    return service.create_seccion(data)
+
 
 @router.get("/{seccion_id}", response_model=SeccionRead)
 async def get_seccion(
@@ -23,6 +28,7 @@ async def get_seccion(
     user: User = Depends(user_is_staff),
 ):
     return service.get_seccion(seccion_id)
+
 
 @router.get("/", response_model=Pagination[SeccionRead])
 async def list_secciones(
@@ -52,6 +58,7 @@ async def list_secciones(
         results=seccions,
     )
 
+
 @router.put("/{seccion_id}", response_model=SeccionRead)
 async def update_seccion(
     seccion_id: int,
@@ -61,6 +68,7 @@ async def update_seccion(
 ):
     return service.update_seccion(seccion_id, data)
 
+
 @router.patch("/{seccion_id}", response_model=SeccionRead)
 async def update_seccion_partial(
     seccion_id: int,
@@ -69,6 +77,7 @@ async def update_seccion_partial(
     user: User = Depends(user_is_staff),
 ):
     return service.update_seccion(seccion_id, data)
+
 
 @router.delete("/{seccion_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_seccion(

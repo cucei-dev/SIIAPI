@@ -1,5 +1,7 @@
-from sqlmodel import Session, select, func
+from sqlmodel import Session, func, select
+
 from app.modules.clase.models import Clase
+
 
 class ClaseRepository:
     def __init__(self, session: Session):
@@ -21,7 +23,9 @@ class ClaseRepository:
 
         if filters.get("seccion_id") is not None:
             statement = statement.where(Clase.seccion_id == filters["seccion_id"])
-            total_statement = total_statement.where(Clase.seccion_id == filters["seccion_id"])
+            total_statement = total_statement.where(
+                Clase.seccion_id == filters["seccion_id"]
+            )
 
         if filters.get("aula_id") is not None:
             statement = statement.where(Clase.aula_id == filters["aula_id"])
@@ -29,17 +33,23 @@ class ClaseRepository:
 
         if filters.get("hora_inicio") is not None:
             statement = statement.where(Clase.hora_inicio == filters["hora_inicio"])
-            total_statement = total_statement.where(Clase.hora_inicio == filters["hora_inicio"])
+            total_statement = total_statement.where(
+                Clase.hora_inicio == filters["hora_inicio"]
+            )
 
         if filters.get("hora_fin") is not None:
             statement = statement.where(Clase.hora_fin == filters["hora_fin"])
-            total_statement = total_statement.where(Clase.hora_fin == filters["hora_fin"])
+            total_statement = total_statement.where(
+                Clase.hora_fin == filters["hora_fin"]
+            )
 
         if filters.get("dia") is not None:
             statement = statement.where(Clase.dia == filters["dia"])
             total_statement = total_statement.where(Clase.dia == filters["dia"])
 
-        statement = statement.offset(filters.get("skip", 0)).limit(filters.get("limit", 100))
+        statement = statement.offset(filters.get("skip", 0)).limit(
+            filters.get("limit", 100)
+        )
         clases = self.session.exec(statement).all()
         total = self.session.exec(total_statement).one()
 

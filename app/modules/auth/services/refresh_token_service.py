@@ -1,8 +1,10 @@
-from app.modules.auth.repositories.refresh_token_repository import RefreshTokenRepository
-from app.modules.auth.schemas import RefreshTokenCreate, RefreshTokenUpdate
+from app.core.exceptions import ConflictException, NotFoundException
 from app.modules.auth.models import RefreshToken
-from app.core.exceptions import NotFoundException, ConflictException
+from app.modules.auth.repositories.refresh_token_repository import \
+    RefreshTokenRepository
+from app.modules.auth.schemas import RefreshTokenCreate, RefreshTokenUpdate
 from app.modules.users.repositories.user_repository import UserRepository
+
 
 class RefreshTokenService:
     def __init__(
@@ -17,8 +19,8 @@ class RefreshTokenService:
         token = RefreshToken.model_validate(data)
 
         if self.user_repository.get(data.user_id):
-            _,exists_jti = self.repository.list({"jti": data.jti})
-            _,exists_token_hash = self.repository.list({"token_hash": data.token_hash})
+            _, exists_jti = self.repository.list({"jti": data.jti})
+            _, exists_token_hash = self.repository.list({"token_hash": data.token_hash})
             if exists_jti or exists_token_hash:
                 raise ConflictException("Refresh Token already exists.")
 

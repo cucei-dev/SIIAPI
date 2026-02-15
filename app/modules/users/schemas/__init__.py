@@ -1,5 +1,7 @@
-from .user import UserRead, UserCreate, UserUpdate, UserAllowedUpdate, UserAllowedCreate
 from app.modules.auth.schemas.refresh_token import RefreshTokenReadMinimal
+
+from .user import (UserAllowedCreate, UserAllowedUpdate, UserCreate, UserRead,
+                   UserUpdate)
 
 UserRead.model_rebuild()
 

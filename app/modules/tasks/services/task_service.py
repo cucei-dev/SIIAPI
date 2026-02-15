@@ -1,24 +1,29 @@
 import re
-from bs4 import BeautifulSoup
-import requests
 from datetime import datetime, time
+
+import requests
+from bs4 import BeautifulSoup
+
 from app.core.config import settings
-from app.modules.centro.services.centro_service import CentroUniversitarioService
-from app.modules.calendario.services.calendario_service import CalendarioService
-from app.modules.materia.services.materia_service import MateriaService
-from app.modules.profesor.services.profesor_service import ProfesorService
-from app.modules.edificio.services.edificio_service import EdificioService
-from app.modules.seccion.services.seccion_service import SeccionService
-from app.modules.aula.services.aula_service import AulaService
-from app.modules.clase.services.clase_service import ClaseService
-from app.modules.tasks.schemas.siiau import SeccionSiiau
 from app.core.exceptions import ConflictException
-from app.modules.materia.schemas import MateriaCreate
-from app.modules.profesor.schemas import ProfesorCreate
-from app.modules.seccion.schemas import SeccionCreate
-from app.modules.edificio.schemas import EdificioCreate
 from app.modules.aula.schemas import AulaCreate
+from app.modules.aula.services.aula_service import AulaService
+from app.modules.calendario.services.calendario_service import \
+    CalendarioService
+from app.modules.centro.services.centro_service import \
+    CentroUniversitarioService
 from app.modules.clase.schemas import ClaseCreate
+from app.modules.clase.services.clase_service import ClaseService
+from app.modules.edificio.schemas import EdificioCreate
+from app.modules.edificio.services.edificio_service import EdificioService
+from app.modules.materia.schemas import MateriaCreate
+from app.modules.materia.services.materia_service import MateriaService
+from app.modules.profesor.schemas import ProfesorCreate
+from app.modules.profesor.services.profesor_service import ProfesorService
+from app.modules.seccion.schemas import SeccionCreate
+from app.modules.seccion.services.seccion_service import SeccionService
+from app.modules.tasks.schemas.siiau import SeccionSiiau
+
 
 class TasksService:
     def __init__(
@@ -42,79 +47,94 @@ class TasksService:
         self.clase_service = clase_service
 
     def parse_table(self, soup: BeautifulSoup) -> list[SeccionSiiau]:
-        tabla = soup.find('table')
+        tabla = soup.find("table")
         if not tabla:
             return []
 
-        filas = tabla.find_all('tr', recursive=False)
+        filas = tabla.find_all("tr", recursive=False)
         datos_finales = []
         for tr in filas:
-            tds = tr.find_all('td', recursive=False)
-            if not tds or not re.match(r'^\d{4,}', tds[0].get_text(strip=True)):
+            tds = tr.find_all("td", recursive=False)
+            if not tds or not re.match(r"^\d{4,}", tds[0].get_text(strip=True)):
                 continue
 
             def txt(cell):
-                return cell.get_text(' ', strip=True)
+                return cell.get_text(" ", strip=True)
 
             base_info = {
-                'NRC': txt(tds[0]),
-                'Clave': txt(tds[1]) if len(tds) > 1 else None,
-                'Materia': txt(tds[2]) if len(tds) > 2 else None,
-                'Sec': txt(tds[3]) if len(tds) > 3 else None,
-                'CR': txt(tds[4]) if len(tds) > 4 else None,
-                'CUP': txt(tds[5]) if len(tds) > 5 else None,
-                'DIS': txt(tds[6]) if len(tds) > 6 else None,
+                "NRC": txt(tds[0]),
+                "Clave": txt(tds[1]) if len(tds) > 1 else None,
+                "Materia": txt(tds[2]) if len(tds) > 2 else None,
+                "Sec": txt(tds[3]) if len(tds) > 3 else None,
+                "CR": txt(tds[4]) if len(tds) > 4 else None,
+                "CUP": txt(tds[5]) if len(tds) > 5 else None,
+                "DIS": txt(tds[6]) if len(tds) > 6 else None,
             }
 
             profesor = None
             if len(tds) > 8:
-                inner_prof = tds[8].find('table')
+                inner_prof = tds[8].find("table")
                 if inner_prof:
-                    prof_tr = inner_prof.find('tr')
-                    if prof_tr and len(prof_tr.find_all('td')) >= 2:
-                        profesor = prof_tr.find_all('td')[1].get_text(' ', strip=True)
+                    prof_tr = inner_prof.find("tr")
+                    if prof_tr and len(prof_tr.find_all("td")) >= 2:
+                        profesor = prof_tr.find_all("td")[1].get_text(" ", strip=True)
                     elif prof_tr:
                         profesor = txt(prof_tr)
                 else:
                     profesor = txt(tds[8])
 
-            base_info['Profesor'] = profesor
+            base_info["Profesor"] = profesor
 
             horario_str = None
             if len(tds) > 7:
-                inner_table = tds[7].find('table')
+                inner_table = tds[7].find("table")
                 if inner_table:
                     parts = []
-                    for ir in inner_table.find_all('tr'):
-                        parts.append(' | '.join([c.get_text(' ', strip=True) for c in ir.find_all('td')]))
-                    horario_str = ' ; '.join(p for p in parts if p.strip())
+                    for ir in inner_table.find_all("tr"):
+                        parts.append(
+                            " | ".join(
+                                [c.get_text(" ", strip=True) for c in ir.find_all("td")]
+                            )
+                        )
+                    horario_str = " ; ".join(p for p in parts if p.strip())
                 else:
                     horario_str = txt(tds[7])
 
             if horario_str.strip():
-                sesiones = horario_str.split(';')
+                sesiones = horario_str.split(";")
                 for sesion in sesiones:
-                    partes = [p.strip() for p in sesion.split('|')]
+                    partes = [p.strip() for p in sesion.split("|")]
                     fila_expandida = base_info.copy()
-                    fila_expandida.update({
-                        'SesionNum': partes[0] if len(partes) > 0 else None,
-                        'Horas': partes[1] if len(partes) > 1 else None,
-                        'Dias': partes[2] if len(partes) > 2 else None,
-                        'Edificio': partes[3] if len(partes) > 3 else None,
-                        'Aula': partes[4] if len(partes) > 4 else None,
-                        'Periodo': partes[5] if len(partes) > 5 else None,
-                    })
+                    fila_expandida.update(
+                        {
+                            "SesionNum": partes[0] if len(partes) > 0 else None,
+                            "Horas": partes[1] if len(partes) > 1 else None,
+                            "Dias": partes[2] if len(partes) > 2 else None,
+                            "Edificio": partes[3] if len(partes) > 3 else None,
+                            "Aula": partes[4] if len(partes) > 4 else None,
+                            "Periodo": partes[5] if len(partes) > 5 else None,
+                        }
+                    )
                     datos_finales.append(fila_expandida)
             else:
                 fila_vacia = base_info.copy()
-                fila_vacia.update({
-                    'SesionNum': None, 'Horas': None, 'Dias': None, 'Edificio': None, 'Aula': None, 'Periodo': None
-                })
+                fila_vacia.update(
+                    {
+                        "SesionNum": None,
+                        "Horas": None,
+                        "Dias": None,
+                        "Edificio": None,
+                        "Aula": None,
+                        "Periodo": None,
+                    }
+                )
                 datos_finales.append(fila_vacia)
 
         return datos_finales
 
-    def make_request(self, calendario: str, centro: str, limite: int = 15000) -> list[SeccionSiiau]:
+    def make_request(
+        self, calendario: str, centro: str, limite: int = 15000
+    ) -> list[SeccionSiiau]:
         payload = {
             "ciclop": calendario,
             "cup": centro,
@@ -122,11 +142,13 @@ class TasksService:
         }
 
         response = requests.post(settings.SIIAU_URL, data=payload)
-        soup = BeautifulSoup(response.text, 'html.parser')
+        soup = BeautifulSoup(response.text, "html.parser")
 
         return self.parse_table(soup)
 
-    def save_secciones(self, data: list[SeccionSiiau], calendario_id: int, centro_id: int) -> dict[str, int]:
+    def save_secciones(
+        self, data: list[SeccionSiiau], calendario_id: int, centro_id: int
+    ) -> dict[str, int]:
         errors = []
         secciones_creadas = 0
         materias_creadas = 0
@@ -141,12 +163,16 @@ class TasksService:
                 errors.append(ConflictException("NRC is null"))
                 continue
 
-            _,secciones = self.seccion_service.list_secciones(nrc=d.NRC, calendario_id=calendario_id)
+            _, secciones = self.seccion_service.list_secciones(
+                nrc=d.NRC, calendario_id=calendario_id
+            )
 
             if secciones != 0:
-                errors.append(ConflictException("NRC already in use in that Calendario"))
+                errors.append(
+                    ConflictException("NRC already in use in that Calendario")
+                )
                 continue
-            
+
             if not d.Clave or d.Clave == "":
                 errors.append(ConflictException("Clave is null"))
                 continue
@@ -155,7 +181,7 @@ class TasksService:
                 errors.append(ConflictException("Materia is null"))
                 continue
 
-            materias_db,materias = self.materia_service.list_materias(clave=d.Clave)
+            materias_db, materias = self.materia_service.list_materias(clave=d.Clave)
 
             if materias == 0:
                 materias_creadas += 1
@@ -172,7 +198,9 @@ class TasksService:
             if not d.Profesor or d.Profesor == "":
                 profesor = None
             else:
-                profesores_db,profesores = self.profesor_service.list_profesores(name=d.Profesor)
+                profesores_db, profesores = self.profesor_service.list_profesores(
+                    name=d.Profesor
+                )
 
                 if profesores == 0:
                     profesores_creados += 1
@@ -183,7 +211,7 @@ class TasksService:
                     )
                 else:
                     profesor = profesores_db[0]
-            
+
             if not d.Sec or d.Sec == "":
                 errors.append(ConflictException("Sec is null"))
                 continue
@@ -208,14 +236,16 @@ class TasksService:
                     centro_id=centro_id,
                     materia_id=materia.id,
                     profesor_id=profesor.id if profesor else None,
-                    calendario_id=calendario_id
+                    calendario_id=calendario_id,
                 )
             )
 
             if not d.Edificio or d.Edificio == "":
                 edificio = None
             else:
-                edificios_db,edificios = self.edificio_service.list_edificios(name=d.Edificio, centro_id=centro_id)
+                edificios_db, edificios = self.edificio_service.list_edificios(
+                    name=d.Edificio, centro_id=centro_id
+                )
 
                 if edificios == 0:
                     edificios_creados += 1
@@ -227,25 +257,24 @@ class TasksService:
                     )
                 else:
                     edificio = edificios_db[0]
-            
+
             if not d.Aula or d.Aula == "":
                 aula = None
             elif edificio:
-                aulas_db,aulas = self.aula_service.list_aulas(name=d.Aula, edificio_id=edificio.id)
+                aulas_db, aulas = self.aula_service.list_aulas(
+                    name=d.Aula, edificio_id=edificio.id
+                )
 
                 if aulas == 0:
                     aulas_creadas += 1
                     aula = self.aula_service.create_aula(
-                        AulaCreate(
-                            name=d.Aula,
-                            edificio_id=edificio.id
-                        )
+                        AulaCreate(name=d.Aula, edificio_id=edificio.id)
                     )
                 else:
                     aula = aulas_db[0]
             else:
                 aula = None
-            
+
             if not d.Horas or d.Horas == "":
                 hora_inicio = None
                 hora_fin = None
@@ -275,7 +304,7 @@ class TasksService:
                 )
                 # except Exception as e:
                 #     errors.append(e)
-        
+
         return {
             "secciones_creadas": secciones_creadas,
             "materias_creadas": materias_creadas,

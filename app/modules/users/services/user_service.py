@@ -1,8 +1,10 @@
-from app.modules.users.repositories.user_repository import UserRepository
-from app.modules.users.schemas import UserCreate, UserUpdate, UserAllowedUpdate, UserAllowedCreate
-from app.modules.users.models import User
-from app.core.exceptions import NotFoundException, ConflictException
+from app.core.exceptions import ConflictException, NotFoundException
 from app.core.security import hash_password
+from app.modules.users.models import User
+from app.modules.users.repositories.user_repository import UserRepository
+from app.modules.users.schemas import (UserAllowedCreate, UserAllowedUpdate,
+                                       UserCreate, UserUpdate)
+
 
 class UserService:
     def __init__(
@@ -11,10 +13,12 @@ class UserService:
     ):
         self.repository = repository
 
-    def create_user(self, data: UserCreate | UserAllowedCreate, email_validate: bool = False) -> User:
+    def create_user(
+        self, data: UserCreate | UserAllowedCreate, email_validate: bool = False
+    ) -> User:
         user = User.model_validate(data)
 
-        _,existing = self.repository.list({"email": user.email})
+        _, existing = self.repository.list({"email": user.email})
         if existing:
             raise ConflictException("Email already registered.")
 
@@ -44,7 +48,7 @@ class UserService:
             raise NotFoundException("User not found.")
 
         if data.email and data.email != user.email:
-            _,existing = self.repository.list({"email": data.email})
+            _, existing = self.repository.list({"email": data.email})
             if existing:
                 raise ConflictException("Email already registered.")
 

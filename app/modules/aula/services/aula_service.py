@@ -1,8 +1,10 @@
+from app.core.exceptions import ConflictException, NotFoundException
+from app.modules.aula.models import Aula
 from app.modules.aula.repositories.aula_repository import AulaRepository
 from app.modules.aula.schemas import AulaCreate, AulaUpdate
-from app.modules.aula.models import Aula
-from app.core.exceptions import NotFoundException, ConflictException
-from app.modules.edificio.repositories.edificio_repository import EdificioRepository
+from app.modules.edificio.repositories.edificio_repository import \
+    EdificioRepository
+
 
 class AulaService:
     def __init__(
@@ -20,10 +22,14 @@ class AulaService:
         if not edificio:
             raise NotFoundException("Edificio not found.")
 
-        _,total = self.repository.list({"edificio_id": aula.edificio_id, "name": aula.name})
+        _, total = self.repository.list(
+            {"edificio_id": aula.edificio_id, "name": aula.name}
+        )
 
         if total != 0:
-            raise ConflictException("Aula with that name in that Edificio already exists.")
+            raise ConflictException(
+                "Aula with that name in that Edificio already exists."
+            )
 
         return self.repository.create(aula)
 

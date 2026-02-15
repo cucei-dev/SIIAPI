@@ -1,12 +1,15 @@
 from fastapi import APIRouter, Depends, status
-from app.modules.users.schemas import UserRead, UserCreate, UserUpdate
-from app.modules.users.services.user_service import UserService
-from .dependencies import get_user_service
-from app.api.schemas import Pagination
+
 from app.api.dependencies.auth import user_is_superuser
+from app.api.schemas import Pagination
 from app.modules.users.models import User
+from app.modules.users.schemas import UserCreate, UserRead, UserUpdate
+from app.modules.users.services.user_service import UserService
+
+from .dependencies import get_user_service
 
 router = APIRouter()
+
 
 @router.post("/", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 async def create_user(
@@ -14,7 +17,8 @@ async def create_user(
     service: UserService = Depends(get_user_service),
     user: User = Depends(user_is_superuser),
 ):
-        return service.create_user(data)
+    return service.create_user(data)
+
 
 @router.get("/{user_id}", response_model=UserRead)
 async def get_user(
@@ -23,6 +27,7 @@ async def get_user(
     user: User = Depends(user_is_superuser),
 ):
     return service.get_user(user_id)
+
 
 @router.get("/", response_model=Pagination[UserRead])
 async def list_users(
@@ -50,6 +55,7 @@ async def list_users(
         results=users,
     )
 
+
 @router.put("/{user_id}", response_model=UserRead)
 async def update_user(
     user_id: int,
@@ -58,6 +64,7 @@ async def update_user(
     user: User = Depends(user_is_superuser),
 ):
     return service.update_user(user_id, data)
+
 
 @router.patch("/{user_id}", response_model=UserRead)
 async def update_user_partial(
@@ -68,6 +75,7 @@ async def update_user_partial(
 ):
     return service.update_user(user_id, data)
 
+
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def soft_delete_user(
     user_id: int,
@@ -75,6 +83,7 @@ async def soft_delete_user(
     user: User = Depends(user_is_superuser),
 ):
     service.delete_user(user_id)
+
 
 @router.delete("/{user_id}/hard", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(

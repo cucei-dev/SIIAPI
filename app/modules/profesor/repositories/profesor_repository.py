@@ -1,5 +1,7 @@
-from sqlmodel import Session, select, func, or_
+from sqlmodel import Session, func, or_, select
+
 from app.modules.profesor.models import Profesor
+
 
 class ProfesorRepository:
     def __init__(self, session: Session):
@@ -36,7 +38,9 @@ class ProfesorRepository:
                 )
             )
 
-        statement = statement.offset(filters.get("skip", 0)).limit(filters.get("limit", 100))
+        statement = statement.offset(filters.get("skip", 0)).limit(
+            filters.get("limit", 100)
+        )
         profesores = self.session.exec(statement).all()
         total = self.session.exec(total_statement).one()
 

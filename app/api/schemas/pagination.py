@@ -1,7 +1,9 @@
-from pydantic import BaseModel
-from typing import TypeVar, Generic
+from typing import Generic, TypeVar
 
-T = TypeVar('T')
+from pydantic import BaseModel
+
+T = TypeVar("T")
+
 
 class Pagination(BaseModel, Generic[T]):
     total: int

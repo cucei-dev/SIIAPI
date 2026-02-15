@@ -1,7 +1,9 @@
-from app.modules.calendario.repositories.calendario_repository import CalendarioRepository
-from app.modules.calendario.schemas import CalendarioCreate, CalendarioUpdate
+from app.core.exceptions import ConflictException, NotFoundException
 from app.modules.calendario.models import Calendario
-from app.core.exceptions import NotFoundException, ConflictException
+from app.modules.calendario.repositories.calendario_repository import \
+    CalendarioRepository
+from app.modules.calendario.schemas import CalendarioCreate, CalendarioUpdate
+
 
 class CalendarioService:
     def __init__(
@@ -12,7 +14,7 @@ class CalendarioService:
 
     def create_calendario(self, data: CalendarioCreate) -> Calendario:
         calendario = Calendario.model_validate(data)
-        _,total = self.repository.list({"siiau_id": calendario.siiau_id})
+        _, total = self.repository.list({"siiau_id": calendario.siiau_id})
 
         if total != 0:
             raise ConflictException("Calendario with that siiau_id already exists.")
@@ -29,7 +31,9 @@ class CalendarioService:
     def list_calendarios(self, **filters) -> tuple[list[Calendario], int]:
         return self.repository.list(filters)
 
-    def update_calendario(self, calendario_id: int, data: CalendarioUpdate) -> Calendario:
+    def update_calendario(
+        self, calendario_id: int, data: CalendarioUpdate
+    ) -> Calendario:
         calendario = self.repository.get(calendario_id)
         if not calendario:
             raise NotFoundException("Calendario not found.")

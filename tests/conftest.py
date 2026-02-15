@@ -1,20 +1,22 @@
 """
 Pytest configuration and fixtures for the test suite
 """
+
+from typing import Generator
+from unittest.mock import Mock
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
-from typing import Generator
-from unittest.mock import Mock
 
-from app.main import app
-from app.core.database import engine as production_engine
 from app.api.dependencies.database import get_session
-from app.modules.users.models import User
+from app.core.database import engine as production_engine
+from app.core.security import create_access_token, hash_password
+from app.main import app
 from app.modules.auth.models import RefreshToken
-from app.core.security import hash_password, create_access_token
 from app.modules.auth.schemas import AccessTokenData
+from app.modules.users.models import User
 
 
 # Test database engine with in-memory SQLite
@@ -40,6 +42,7 @@ def session_fixture(test_engine) -> Generator[Session, None, None]:
 @pytest.fixture(name="client")
 def client_fixture(session: Session) -> Generator[TestClient, None, None]:
     """Create a test client with overridden dependencies"""
+
     def get_session_override():
         return session
 

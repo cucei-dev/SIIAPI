@@ -1,5 +1,6 @@
 from sqlmodel import SQLModel
 
+
 class SeccionSiiau(SQLModel):
     NRC: str
     Clave: str

@@ -1,11 +1,13 @@
 """
 Unit tests for core config module
 """
-import pytest
+
 import os
 from unittest.mock import patch
 
-from app.core.config import get_bool, get_float, Settings
+import pytest
+
+from app.core.config import Settings, get_bool, get_float
 
 
 @pytest.mark.unit
@@ -86,7 +88,7 @@ class TestSettings:
         """Test settings with default values"""
         with patch.dict(os.environ, {}, clear=True):
             settings = Settings()
-            
+
             assert settings.DB_URL == "sqlite:///./db.sqlite3"
             assert settings.APP_SITE == "localhost"
             assert settings.APP_ENV == "dev"
@@ -108,10 +110,10 @@ class TestSettings:
             "DUMMY_HASH": "test-dummy-hash",
             "SIIAU_URL": "https://siiau.test.com",
         }
-        
+
         with patch.dict(os.environ, env_vars, clear=True):
             settings = Settings()
-            
+
             assert settings.DB_URL == "postgresql://user:pass@localhost/testdb"
             assert settings.APP_NAME == "Test API"
             assert settings.APP_SITE == "testsite.com"
@@ -132,7 +134,7 @@ class TestSettings:
             ("0", False),
             ("no", False),
         ]
-        
+
         for value, expected in test_cases:
             with patch.dict(os.environ, {"APP_DEBUG": value}, clear=True):
                 settings = Settings()

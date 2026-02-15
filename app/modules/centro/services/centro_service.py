@@ -1,7 +1,10 @@
-from app.modules.centro.repositories.centro_repository import CentroUniversitarioRepository
-from app.modules.centro.schemas import CentroUniversitarioCreate, CentroUniversitarioUpdate
+from app.core.exceptions import ConflictException, NotFoundException
 from app.modules.centro.models import CentroUniversitario
-from app.core.exceptions import NotFoundException, ConflictException
+from app.modules.centro.repositories.centro_repository import \
+    CentroUniversitarioRepository
+from app.modules.centro.schemas import (CentroUniversitarioCreate,
+                                        CentroUniversitarioUpdate)
+
 
 class CentroUniversitarioService:
     def __init__(
@@ -12,10 +15,12 @@ class CentroUniversitarioService:
 
     def create_centro(self, data: CentroUniversitarioCreate) -> CentroUniversitario:
         centro = CentroUniversitario.model_validate(data)
-        _,total = self.repository.list({"siiau_id": centro.siiau_id})
+        _, total = self.repository.list({"siiau_id": centro.siiau_id})
 
         if total != 0:
-            raise ConflictException("Centro Universitario with that siiau_id already exists.")
+            raise ConflictException(
+                "Centro Universitario with that siiau_id already exists."
+            )
 
         return self.repository.create(centro)
 
@@ -29,7 +34,9 @@ class CentroUniversitarioService:
     def list_centros(self, **filters) -> tuple[list[CentroUniversitario], int]:
         return self.repository.list(filters)
 
-    def update_centro(self, centro_id: int, data: CentroUniversitarioUpdate) -> CentroUniversitario:
+    def update_centro(
+        self, centro_id: int, data: CentroUniversitarioUpdate
+    ) -> CentroUniversitario:
         centro = self.repository.get(centro_id)
         if not centro:
             raise NotFoundException("Centro Universitario not found.")

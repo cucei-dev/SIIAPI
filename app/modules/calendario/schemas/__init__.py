@@ -1,5 +1,7 @@
-from .calendario import CalendarioBase, CalendarioCreate, CalendarioRead, CalendarioUpdate
 from app.modules.seccion.schemas.seccion import SeccionReadMinimal
+
+from .calendario import (CalendarioBase, CalendarioCreate, CalendarioRead,
+                         CalendarioUpdate)
 
 CalendarioRead.model_rebuild()
 

@@ -1,6 +1,8 @@
 from datetime import datetime
-from sqlmodel import SQLModel, Field, Relationship
+
 from pydantic import ConfigDict
+from sqlmodel import Field, Relationship, SQLModel
+
 
 class RefreshToken(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
