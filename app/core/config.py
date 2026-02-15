@@ -31,4 +31,6 @@ class Settings:
     DUMMY_HASH: str = os.getenv("DUMMY_HASH")
     ALGORITHM: str = "HS256"
 
+    SIIAU_URL: str = os.getenv("SIIAU_URL")
+
 settings = Settings()
