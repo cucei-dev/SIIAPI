@@ -3,3 +3,4 @@ sqlmodel
 passlib
 python-jose
 shieldcipher
+alembic

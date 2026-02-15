@@ -1,4 +1,4 @@
-.PHONY: help install test test-unit test-integration test-cov clean lint format
+.PHONY: help install test test-unit test-integration test-cov clean lint format migrate
 
 help:
 	@echo "Available commands:"
@@ -10,6 +10,15 @@ help:
 	@echo "  make lint             - Run linters"
 	@echo "  make format           - Format code with black and isort"
 	@echo "  make clean            - Clean up generated files"
+	@echo ""
+	@echo "Database commands:"
+	@echo "  make db-init          - Initialize database (development)"
+	@echo "  make db-seed          - Seed database with test data"
+	@echo "  make migrate          - Run database migrations"
+	@echo "  make migrate-create   - Create a new migration (autogenerate)"
+	@echo "  make migrate-history  - Show migration history"
+	@echo "  make migrate-current  - Show current migration revision"
+	@echo "  make migrate-downgrade - Downgrade one migration"
 
 install:
 	pip install -r requirements-test.txt
@@ -59,3 +68,20 @@ db-init:
 
 db-seed:
 	python -c "from app.core.seed import seed_data; seed_data()"
+
+# Alembic migration commands
+migrate:
+	alembic upgrade head
+
+migrate-create:
+	@read -p "Enter migration message: " msg; \
+	alembic revision --autogenerate -m "$$msg"
+
+migrate-history:
+	alembic history --verbose
+
+migrate-current:
+	alembic current
+
+migrate-downgrade:
+	alembic downgrade -1

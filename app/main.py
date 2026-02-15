@@ -5,14 +5,19 @@ from fastapi import FastAPI
 from app.api import router as api_router
 from app.core.config import settings
 from app.core.database import init_db
+from app.core.migrations import run_migrations
 from app.core.seed import seed_data
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     if settings.APP_DEBUG:
+        # In debug mode, use SQLModel's create_all for quick development
         init_db()
         seed_data()
+    else:
+        # In production, use Alembic migrations
+        run_migrations()
     yield
 
 
