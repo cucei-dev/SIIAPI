@@ -4,3 +4,4 @@ passlib
 python-jose
 shieldcipher
 alembic
+psycopg2-binary
