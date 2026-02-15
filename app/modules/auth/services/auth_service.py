@@ -59,7 +59,6 @@ class AuthService:
                 RefreshTokenData(
                     sub=user.email,
                 ),
-                remember_me=login_data.remember_me,
             )
 
             refresh_token_data = RefreshTokenCreate(
