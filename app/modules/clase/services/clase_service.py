@@ -42,10 +42,12 @@ class ClaseService:
             raise ConflictException("A clase with same parameters already exists.")
         return self.repository.create(clase)
 
-    def get_clase(self, clase_id: int):
+    def get_clase(self, clase_id: int) -> Clase:
         clase = self.repository.get(clase_id)
         if not clase:
             raise NotFoundException("Clase not found.")
+
+        return clase
 
     def list_clases(self, **filters) -> tuple[list[Clase], int]:
         return self.repository.list(filters)

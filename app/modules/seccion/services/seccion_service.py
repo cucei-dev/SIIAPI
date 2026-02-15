@@ -51,10 +51,12 @@ class SeccionService:
             raise ConflictException("Seccion with that nrc in that Calendario already exists.")
         return self.repository.create(seccion)
 
-    def get_seccion(self, seccion_id: int):
+    def get_seccion(self, seccion_id: int) -> Seccion:
         seccion = self.repository.get(seccion_id)
         if not seccion:
             raise NotFoundException("Sección not found.")
+
+        return seccion
 
     def list_secciones(self, **filters) -> tuple[list[Seccion], int]:
         return self.repository.list(filters)

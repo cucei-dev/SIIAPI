@@ -19,10 +19,12 @@ class CentroUniversitarioService:
 
         return self.repository.create(centro)
 
-    def get_centro(self, centro_id: int):
+    def get_centro(self, centro_id: int) -> CentroUniversitario:
         centro = self.repository.get(centro_id)
         if not centro:
             raise NotFoundException("Centro Universitario not found.")
+
+        return centro
 
     def list_centros(self, **filters) -> tuple[list[CentroUniversitario], int]:
         return self.repository.list(filters)

@@ -27,10 +27,12 @@ class AulaService:
 
         return self.repository.create(aula)
 
-    def get_aula(self, aula_id: int):
+    def get_aula(self, aula_id: int) -> Aula:
         aula = self.repository.get(aula_id)
         if not aula:
             raise NotFoundException("Aula not found.")
+
+        return aula
 
     def list_aulas(self, **filters) -> tuple[list[Aula], int]:
         return self.repository.list(filters)

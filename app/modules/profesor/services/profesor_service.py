@@ -19,10 +19,12 @@ class ProfesorService:
 
         return self.repository.create(profesor)
 
-    def get_profesor(self, profesor_id: int):
+    def get_profesor(self, profesor_id: int) -> Profesor:
         profesor = self.repository.get(profesor_id)
         if not profesor:
             raise NotFoundException("Profesor not found.")
+
+        return profesor
 
     def list_profesores(self, **filters) -> tuple[list[Profesor], int]:
         return self.repository.list(filters)

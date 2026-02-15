@@ -27,10 +27,12 @@ class EdificioService:
 
         return self.repository.create(edificio)
 
-    def get_edificio(self, edificio_id: int):
+    def get_edificio(self, edificio_id: int) -> Edificio:
         edificio = self.repository.get(edificio_id)
         if not edificio:
             raise NotFoundException("Edificio not found.")
+
+        return edificio
 
     def list_edificios(self, **filters) -> tuple[list[Edificio], int]:
         return self.repository.list(filters)

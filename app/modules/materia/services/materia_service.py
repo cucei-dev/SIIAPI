@@ -19,10 +19,12 @@ class MateriaService:
 
         return self.repository.create(materia)
 
-    def get_materia(self, materia_id: int):
+    def get_materia(self, materia_id: int) -> Materia:
         materia = self.repository.get(materia_id)
         if not materia:
             raise NotFoundException("Materia not found.")
+
+        return materia
 
     def list_materias(self, **filters) -> tuple[list[Materia], int]:
         return self.repository.list(filters)

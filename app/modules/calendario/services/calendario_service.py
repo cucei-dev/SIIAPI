@@ -19,10 +19,12 @@ class CalendarioService:
 
         return self.repository.create(calendario)
 
-    def get_calendario(self, calendario_id: int):
+    def get_calendario(self, calendario_id: int) -> Calendario:
         calendario = self.repository.get(calendario_id)
         if not calendario:
             raise NotFoundException("Calendario not found.")
+
+        return calendario
 
     def list_calendarios(self, **filters) -> tuple[list[Calendario], int]:
         return self.repository.list(filters)
