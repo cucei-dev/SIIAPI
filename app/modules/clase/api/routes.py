@@ -26,7 +26,6 @@ async def create_clase(
 async def get_clase(
     clase_id: int,
     service: ClaseService = Depends(get_clase_service),
-    user: User = Depends(user_is_staff),
 ):
     return service.get_clase(clase_id)
 
@@ -42,7 +41,6 @@ async def list_clases(
     skip: int = 0,
     limit: int = 100,
     service: ClaseService = Depends(get_clase_service),
-    user: User = Depends(user_is_staff),
 ):
     clases, total = service.list_clases(
         seccion_id=seccion_id,

@@ -25,7 +25,6 @@ async def create_edificio(
 async def get_edificio(
     edificio_id: int,
     service: EdificioService = Depends(get_edificio_service),
-    user: User = Depends(user_is_staff),
 ):
     return service.get_edificio(edificio_id)
 
@@ -38,7 +37,6 @@ async def list_edificios(
     skip: int = 0,
     limit: int = 100,
     service: EdificioService = Depends(get_edificio_service),
-    user: User = Depends(user_is_staff),
 ):
     edificios, total = service.list_edificios(
         centro_id=centro_id,

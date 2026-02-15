@@ -26,7 +26,6 @@ async def create_calendario(
 async def get_calendario(
     calendario_id: int,
     service: CalendarioService = Depends(get_calendario_service),
-    user: User = Depends(user_is_staff),
 ):
     return service.get_calendario(calendario_id)
 
@@ -38,7 +37,6 @@ async def list_calendarios(
     skip: int = 0,
     limit: int = 100,
     service: CalendarioService = Depends(get_calendario_service),
-    user: User = Depends(user_is_staff),
 ):
     calendarios, total = service.list_calendarios(
         siiau_id=siiau_id,

@@ -25,7 +25,6 @@ async def create_profesor(
 async def get_profesor(
     profesor_id: int,
     service: ProfesorService = Depends(get_profesor_service),
-    user: User = Depends(user_is_staff),
 ):
     return service.get_profesor(profesor_id)
 
@@ -37,7 +36,6 @@ async def list_profesores(
     skip: int = 0,
     limit: int = 100,
     service: ProfesorService = Depends(get_profesor_service),
-    user: User = Depends(user_is_staff),
 ):
     profesors, total = service.list_profesores(
         name=name,
