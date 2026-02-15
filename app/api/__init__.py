@@ -5,8 +5,10 @@ from .schemas import Info
 
 router = APIRouter()
 
+
 @router.get("/", response_model=Info)
 async def get_info():
     return Info()
+
 
 router.include_router(router_v1, prefix="/v1")

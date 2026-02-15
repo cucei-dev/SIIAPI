@@ -20,6 +20,5 @@ def create_superuser(session):
                 password="admin",
                 is_active=True,
                 is_superuser=True,
-                credits=100,
             )
         )

@@ -70,8 +70,6 @@ class UserRepository:
 
     def update(self, data: User) -> User:
         data.updated_at = datetime.now()
-        data.credits = round(data.credits, 4)
-
         self.session.add(data)
         self.session.commit()
         self.session.refresh(data)

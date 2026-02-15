@@ -1,4 +1,4 @@
-from .pagination import Pagination
 from .info import Info
+from .pagination import Pagination
 
 __all__ = ["Pagination", "Info"]
