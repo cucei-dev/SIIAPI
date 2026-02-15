@@ -12,7 +12,7 @@ router = APIRouter()
 async def create_edificio(
     data: EdificioCreate,
     service: EdificioService = Depends(get_edificio_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
         return service.create_edificio(data)
 
@@ -20,7 +20,7 @@ async def create_edificio(
 async def get_edificio(
     edificio_id: int,
     service: EdificioService = Depends(get_edificio_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     return service.get_edificio(edificio_id)
 
@@ -32,7 +32,7 @@ async def list_edificios(
     skip: int = 0,
     limit: int = 100,
     service: EdificioService = Depends(get_edificio_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     edificios, total = service.list_edificios(
         centro_id=centro_id,
@@ -51,7 +51,7 @@ async def update_edificio(
     edificio_id: int,
     data: EdificioUpdate,
     service: EdificioService = Depends(get_edificio_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     return service.update_edificio(edificio_id, data)
 
@@ -60,7 +60,7 @@ async def update_edificio_partial(
     edificio_id: int,
     data: EdificioUpdate,
     service: EdificioService = Depends(get_edificio_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     return service.update_edificio(edificio_id, data)
 
@@ -68,6 +68,6 @@ async def update_edificio_partial(
 async def delete_edificio(
     edificio_id: int,
     service: EdificioService = Depends(get_edificio_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     service.delete_edificio(edificio_id)

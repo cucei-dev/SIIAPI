@@ -12,7 +12,7 @@ router = APIRouter()
 async def create_centro(
     data: CentroUniversitarioCreate,
     service: CentroUniversitarioService = Depends(get_centro_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
         return service.create_centro(data)
 
@@ -20,7 +20,7 @@ async def create_centro(
 async def get_centro(
     centro_id: int,
     service: CentroUniversitarioService = Depends(get_centro_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     return service.get_centro(centro_id)
 
@@ -31,7 +31,7 @@ async def list_centros(
     skip: int = 0,
     limit: int = 100,
     service: CentroUniversitarioService = Depends(get_centro_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     centros, total = service.list_centros(
         siiau_id=siiau_id,
@@ -49,7 +49,7 @@ async def update_centro(
     centro_id: int,
     data: CentroUniversitarioUpdate,
     service: CentroUniversitarioService = Depends(get_centro_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     return service.update_centro(centro_id, data)
 
@@ -58,7 +58,7 @@ async def update_centro_partial(
     centro_id: int,
     data: CentroUniversitarioUpdate,
     service: CentroUniversitarioService = Depends(get_centro_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     return service.update_centro(centro_id, data)
 
@@ -66,6 +66,6 @@ async def update_centro_partial(
 async def delete_centro(
     centro_id: int,
     service: CentroUniversitarioService = Depends(get_centro_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     service.delete_centro(centro_id)

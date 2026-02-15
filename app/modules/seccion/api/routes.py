@@ -12,7 +12,7 @@ router = APIRouter()
 async def create_seccion(
     data: SeccionCreate,
     service: SeccionService = Depends(get_seccion_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
         return service.create_seccion(data)
 
@@ -20,7 +20,7 @@ async def create_seccion(
 async def get_seccion(
     seccion_id: int,
     service: SeccionService = Depends(get_seccion_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     return service.get_seccion(seccion_id)
 
@@ -35,7 +35,7 @@ async def list_secciones(
     skip: int = 0,
     limit: int = 100,
     service: SeccionService = Depends(get_seccion_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     seccions, total = service.list_secciones(
         nrc=nrc,
@@ -57,7 +57,7 @@ async def update_seccion(
     seccion_id: int,
     data: SeccionUpdate,
     service: SeccionService = Depends(get_seccion_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     return service.update_seccion(seccion_id, data)
 
@@ -66,7 +66,7 @@ async def update_seccion_partial(
     seccion_id: int,
     data: SeccionUpdate,
     service: SeccionService = Depends(get_seccion_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     return service.update_seccion(seccion_id, data)
 
@@ -74,6 +74,6 @@ async def update_seccion_partial(
 async def delete_seccion(
     seccion_id: int,
     service: SeccionService = Depends(get_seccion_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     service.delete_seccion(seccion_id)

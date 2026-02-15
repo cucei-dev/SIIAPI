@@ -11,7 +11,7 @@ async def importar_secciones(
     calendario_id: int,
     centro_id: int,
     service: TasksService = Depends(get_tasks_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     return service.get_secciones(
         calendario_id=calendario_id,

@@ -12,7 +12,7 @@ router = APIRouter()
 async def create_aula(
     data: AulaCreate,
     service: AulaService = Depends(get_aula_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
         return service.create_aula(data)
 
@@ -20,7 +20,7 @@ async def create_aula(
 async def get_aula(
     aula_id: int,
     service: AulaService = Depends(get_aula_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     return service.get_aula(aula_id)
 
@@ -32,7 +32,7 @@ async def list_aulas(
     skip: int = 0,
     limit: int = 100,
     service: AulaService = Depends(get_aula_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     aulas, total = service.list_aulas(
         edificio_id=edificio_id,
@@ -51,7 +51,7 @@ async def update_aula(
     aula_id: int,
     data: AulaUpdate,
     service: AulaService = Depends(get_aula_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     return service.update_aula(aula_id, data)
 
@@ -60,7 +60,7 @@ async def update_aula_partial(
     aula_id: int,
     data: AulaUpdate,
     service: AulaService = Depends(get_aula_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     return service.update_aula(aula_id, data)
 
@@ -68,6 +68,6 @@ async def update_aula_partial(
 async def delete_aula(
     aula_id: int,
     service: AulaService = Depends(get_aula_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     service.delete_aula(aula_id)

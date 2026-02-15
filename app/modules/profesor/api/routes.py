@@ -12,7 +12,7 @@ router = APIRouter()
 async def create_profesor(
     data: ProfesorCreate,
     service: ProfesorService = Depends(get_profesor_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
         return service.create_profesor(data)
 
@@ -20,7 +20,7 @@ async def create_profesor(
 async def get_profesor(
     profesor_id: int,
     service: ProfesorService = Depends(get_profesor_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     return service.get_profesor(profesor_id)
 
@@ -31,7 +31,7 @@ async def list_profesores(
     skip: int = 0,
     limit: int = 100,
     service: ProfesorService = Depends(get_profesor_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     profesors, total = service.list_profesores(
         name=name,
@@ -49,7 +49,7 @@ async def update_profesor(
     profesor_id: int,
     data: ProfesorUpdate,
     service: ProfesorService = Depends(get_profesor_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     return service.update_profesor(profesor_id, data)
 
@@ -58,7 +58,7 @@ async def update_profesor_partial(
     profesor_id: int,
     data: ProfesorUpdate,
     service: ProfesorService = Depends(get_profesor_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     return service.update_profesor(profesor_id, data)
 
@@ -66,6 +66,6 @@ async def update_profesor_partial(
 async def delete_profesor(
     profesor_id: int,
     service: ProfesorService = Depends(get_profesor_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     service.delete_profesor(profesor_id)

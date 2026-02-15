@@ -12,7 +12,7 @@ router = APIRouter()
 async def create_calendario(
     data: CalendarioCreate,
     service: CalendarioService = Depends(get_calendario_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
         return service.create_calendario(data)
 
@@ -20,7 +20,7 @@ async def create_calendario(
 async def get_calendario(
     calendario_id: int,
     service: CalendarioService = Depends(get_calendario_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     return service.get_calendario(calendario_id)
 
@@ -31,7 +31,7 @@ async def list_calendarios(
     skip: int = 0,
     limit: int = 100,
     service: CalendarioService = Depends(get_calendario_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     calendarios, total = service.list_calendarios(
         siiau_id=siiau_id,
@@ -49,7 +49,7 @@ async def update_calendario(
     calendario_id: int,
     data: CalendarioUpdate,
     service: CalendarioService = Depends(get_calendario_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     return service.update_calendario(calendario_id, data)
 
@@ -58,7 +58,7 @@ async def update_calendario_partial(
     calendario_id: int,
     data: CalendarioUpdate,
     service: CalendarioService = Depends(get_calendario_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     return service.update_calendario(calendario_id, data)
 
@@ -66,6 +66,6 @@ async def update_calendario_partial(
 async def delete_calendario(
     calendario_id: int,
     service: CalendarioService = Depends(get_calendario_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     service.delete_calendario(calendario_id)

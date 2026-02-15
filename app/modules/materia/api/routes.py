@@ -12,7 +12,7 @@ router = APIRouter()
 async def create_materia(
     data: MateriaCreate,
     service: MateriaService = Depends(get_materia_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
         return service.create_materia(data)
 
@@ -20,7 +20,7 @@ async def create_materia(
 async def get_materia(
     materia_id: int,
     service: MateriaService = Depends(get_materia_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     return service.get_materia(materia_id)
 
@@ -31,7 +31,7 @@ async def list_materias(
     skip: int = 0,
     limit: int = 100,
     service: MateriaService = Depends(get_materia_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     materias, total = service.list_materias(
         clave=clave,
@@ -49,7 +49,7 @@ async def update_materia(
     materia_id: int,
     data: MateriaUpdate,
     service: MateriaService = Depends(get_materia_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     return service.update_materia(materia_id, data)
 
@@ -58,7 +58,7 @@ async def update_materia_partial(
     materia_id: int,
     data: MateriaUpdate,
     service: MateriaService = Depends(get_materia_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     return service.update_materia(materia_id, data)
 
@@ -66,6 +66,6 @@ async def update_materia_partial(
 async def delete_materia(
     materia_id: int,
     service: MateriaService = Depends(get_materia_service),
-    #user: User = Depends(user_is_staff),
+    user: User = Depends(user_is_staff),
 ):
     service.delete_materia(materia_id)
