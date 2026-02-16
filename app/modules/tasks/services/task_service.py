@@ -236,35 +236,50 @@ class TasksService:
         return None
 
     def _create_clases_for_seccion(
-        self, data: SeccionSiiau, seccion_id: int, aula_id: Optional[int]
+        self, data_list: list[SeccionSiiau], seccion_id: int, centro_id: int
     ) -> int:
-        """Create clases for a seccion. Returns number of clases created"""
-        hora_inicio, hora_fin = self._parse_horas(data.Horas)
-        dias = self._parse_dias(data.Dias)
-
+        """Create clases for a seccion from multiple session records. Returns number of clases created"""
         clases_creadas = 0
-        for dia in dias:
-            self.clase_service.create_clase(
-                ClaseCreate(
-                    sesion=int(data.SesionNum) if data.SesionNum else None,
-                    hora_inicio=hora_inicio,
-                    hora_fin=hora_fin,
-                    dia=dia if dia != 0 else None,
-                    seccion_id=seccion_id,
-                    aula_id=aula_id,
+        
+        for data in data_list:
+            # Skip if no schedule data
+            if not data.Horas or not data.Dias:
+                continue
+                
+            hora_inicio, hora_fin = self._parse_horas(data.Horas)
+            dias = self._parse_dias(data.Dias)
+            
+            # Get or create edificio and aula for this session
+            aula_id = None
+            if data.Edificio and data.Edificio != "":
+                edificio, _ = self._get_or_create_edificio(data.Edificio, centro_id)
+                
+                if data.Aula and data.Aula != "":
+                    aula, _ = self._get_or_create_aula(data.Aula, edificio.id)
+                    aula_id = aula.id
+
+            for dia in dias:
+                self.clase_service.create_clase(
+                    ClaseCreate(
+                        sesion=int(data.SesionNum) if data.SesionNum else None,
+                        hora_inicio=hora_inicio,
+                        hora_fin=hora_fin,
+                        dia=dia if dia != 0 else None,
+                        seccion_id=seccion_id,
+                        aula_id=aula_id,
+                    )
                 )
-            )
-            clases_creadas += 1
+                clases_creadas += 1
         return clases_creadas
 
     def _process_seccion(
         self,
-        data: SeccionSiiau,
+        data_list: list[SeccionSiiau],
         calendario_id: int,
         centro_id: int,
         update_if_exists: bool = False,
     ) -> dict:
-        """Process a single seccion. Returns stats dict"""
+        """Process a seccion with all its session records. Returns stats dict"""
         stats = {
             "materias_creadas": 0,
             "profesores_creados": 0,
@@ -275,6 +290,9 @@ class TasksService:
             "secciones_actualizadas": 0,
             "error": None,
         }
+
+        # Use first record for base seccion data
+        data = data_list[0]
 
         # Validate data
         error = self._validate_seccion_data(data)
@@ -306,7 +324,7 @@ class TasksService:
             if created:
                 stats["profesores_creados"] += 1
 
-        # Parse periodo
+        # Parse periodo from first record
         periodo_inicio, periodo_fin = self._parse_periodo(data.Periodo)
 
         # Create or update seccion
@@ -351,24 +369,39 @@ class TasksService:
             )
             stats["secciones_creadas"] += 1
 
-        # Get or create edificio and aula
-        edificio = None
-        aula = None
-        if data.Edificio and data.Edificio != "":
-            edificio, created = self._get_or_create_edificio(data.Edificio, centro_id)
-            if created:
-                stats["edificios_creados"] += 1
-
-            if data.Aula and data.Aula != "":
-                aula, created = self._get_or_create_aula(data.Aula, edificio.id)
-                if created:
-                    stats["aulas_creadas"] += 1
-
-        # Create clases
+        # Create clases for all sessions
         if seccion.id:
-            stats["clases_creadas"] = self._create_clases_for_seccion(
-                data, seccion.id, aula.id if aula else None
+            clases_creadas = self._create_clases_for_seccion(
+                data_list, seccion.id, centro_id
             )
+            stats["clases_creadas"] = clases_creadas
+            
+            # Count unique edificios and aulas created
+            edificios_vistos = set()
+            aulas_vistas = set()
+            for session_data in data_list:
+                if session_data.Edificio and session_data.Edificio != "":
+                    if session_data.Edificio not in edificios_vistos:
+                        edificios_vistos.add(session_data.Edificio)
+                        edificios_db, count = self.edificio_service.list_edificios(
+                            name=session_data.Edificio, centro_id=centro_id
+                        )
+                        if count == 0:
+                            stats["edificios_creados"] += 1
+                    
+                    if session_data.Aula and session_data.Aula != "":
+                        aula_key = f"{session_data.Edificio}:{session_data.Aula}"
+                        if aula_key not in aulas_vistas:
+                            aulas_vistas.add(aula_key)
+                            edificios_db, _ = self.edificio_service.list_edificios(
+                                name=session_data.Edificio, centro_id=centro_id
+                            )
+                            if edificios_db:
+                                aulas_db, count = self.aula_service.list_aulas(
+                                    name=session_data.Aula, edificio_id=edificios_db[0].id
+                                )
+                                if count == 0:
+                                    stats["aulas_creadas"] += 1
 
         return stats
 
@@ -391,9 +424,18 @@ class TasksService:
             "errores": 0,
         }
 
+        # Group records by NRC - multiple records with same NRC represent different sessions
+        secciones_agrupadas: dict[str, list[SeccionSiiau]] = {}
         for item in data:
             d = SeccionSiiau(**item)
-            stats = self._process_seccion(d, calendario_id, centro_id, update_if_exists)
+            nrc = d.NRC
+            if nrc not in secciones_agrupadas:
+                secciones_agrupadas[nrc] = []
+            secciones_agrupadas[nrc].append(d)
+
+        # Process each seccion with all its session records
+        for nrc, registros in secciones_agrupadas.items():
+            stats = self._process_seccion(registros, calendario_id, centro_id, update_if_exists)
 
             if stats["error"]:
                 total_stats["errores"] += 1
