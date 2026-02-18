@@ -278,6 +278,7 @@ class TasksService:
         calendario_id: int,
         centro_id: int,
         update_if_exists: bool = False,
+        full_update: bool = False,
     ) -> dict:
         """Process a seccion with all its session records. Returns stats dict"""
         stats = {
@@ -350,7 +351,7 @@ class TasksService:
                 # Delete existing clases for this seccion
                 clases_db, _ = self.clase_service.list_clases(seccion_id=seccion.id)
                 for clase in clases_db:
-                    if clase.id:
+                    if clase.id and full_update:
                         self.clase_service.delete_clase(clase.id)
         else:
             seccion = self.seccion_service.create_seccion(
@@ -370,7 +371,7 @@ class TasksService:
             stats["secciones_creadas"] += 1
 
         # Create clases for all sessions
-        if seccion.id:
+        if seccion.id and full_update:
             clases_creadas = self._create_clases_for_seccion(
                 data_list, seccion.id, centro_id
             )
@@ -411,6 +412,7 @@ class TasksService:
         calendario_id: int,
         centro_id: int,
         update_if_exists: bool = False,
+        full_update: bool = False,
     ) -> dict[str, int]:
         """Save or update secciones from SIIAU data"""
         total_stats = {
@@ -435,7 +437,7 @@ class TasksService:
 
         # Process each seccion with all its session records
         for nrc, registros in secciones_agrupadas.items():
-            stats = self._process_seccion(registros, calendario_id, centro_id, update_if_exists)
+            stats = self._process_seccion(registros, calendario_id, centro_id, update_if_exists, full_update)
 
             if stats["error"]:
                 total_stats["errores"] += 1
@@ -454,7 +456,7 @@ class TasksService:
         return total_stats
 
     def get_secciones(
-        self, calendario_id: int, centro_id: int, update_existing: bool = False
+        self, calendario_id: int, centro_id: int, update_existing: bool = False, full_update: bool = False
     ):
         """
         Fetch and save secciones from SIIAU.
@@ -478,11 +480,11 @@ class TasksService:
 
         # Process all secciones with update flag
         return self.save_secciones(
-            secciones, calendario.id, centro.id, update_if_exists=update_existing
+            secciones, calendario.id, centro.id, update_if_exists=update_existing, full_update=full_update
         )
 
     def update_all_secciones(
-        self, calendario_id: int, centro_id: int
+        self, calendario_id: int, centro_id: int, full_update: bool = False,
     ) -> dict[str, int]:
         """
         Update all existing secciones with fresh data from SIIAU.
@@ -495,4 +497,4 @@ class TasksService:
         Returns:
             Dictionary with statistics of the operation
         """
-        return self.get_secciones(calendario_id, centro_id, update_existing=True)
+        return self.get_secciones(calendario_id, centro_id, update_existing=True, full_update=full_update)
