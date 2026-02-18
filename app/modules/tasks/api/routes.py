@@ -13,14 +13,26 @@ router = APIRouter()
 async def importar_secciones(
     calendario_id: int,
     centro_id: int,
-    update: bool = False,
     service: TasksService = Depends(get_tasks_service),
     user: User = Depends(user_is_staff),
 ):
     return service.get_secciones(
         calendario_id=calendario_id,
         centro_id=centro_id,
-        update_existing=update,
+    )
+
+
+@router.get("/actualizar-secciones")
+async def importar_secciones(
+    calendario_id: int,
+    centro_id: int,
+    full_update: bool = False,
+    service: TasksService = Depends(get_tasks_service),
+    user: User = Depends(user_is_staff),
+):
+    return service.update_all_secciones(
+        calendario_id=calendario_id,
+        centro_id=centro_id,
     )
 
 
@@ -30,6 +42,7 @@ async def importar_secciones_manual(
     calendario_id: int,
     centro_id: int,
     update: bool = False,
+    full_update: bool = False,
     service: TasksService = Depends(get_tasks_service),
     user: User = Depends(user_is_staff),
 ):
@@ -38,4 +51,5 @@ async def importar_secciones_manual(
         calendario_id=calendario_id,
         centro_id=centro_id,
         update_if_exists=update,
+        full_update=full_update,
     )
