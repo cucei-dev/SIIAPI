@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, Query, status
 
 from app.api.dependencies.auth import user_is_staff
@@ -15,8 +17,8 @@ router = APIRouter()
 @router.post("/", response_model=ProfesorRead, status_code=status.HTTP_201_CREATED)
 async def create_profesor(
     data: ProfesorCreate,
-    service: ProfesorService = Depends(get_profesor_service),
-    user: User = Depends(user_is_staff),
+    service: Annotated[ProfesorService, Depends(get_profesor_service)],
+    user: Annotated[User, Depends(user_is_staff)],
 ):
     return service.create_profesor(data)
 
@@ -24,18 +26,18 @@ async def create_profesor(
 @router.get("/{profesor_id}", response_model=ProfesorRead)
 async def get_profesor(
     profesor_id: int,
-    service: ProfesorService = Depends(get_profesor_service),
+    service: Annotated[ProfesorService, Depends(get_profesor_service)],
 ):
     return service.get_profesor(profesor_id)
 
 
 @router.get("/", response_model=Pagination[ProfesorRead])
 async def list_profesores(
+    service: Annotated[ProfesorService, Depends(get_profesor_service)],
     name: str | None = None,
     search: str | None = None,
-    skip: int = 0,
+    skip: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=1, le=100),
-    service: ProfesorService = Depends(get_profesor_service),
 ):
     profesors, total = service.list_profesores(
         name=name,
@@ -53,8 +55,8 @@ async def list_profesores(
 async def update_profesor(
     profesor_id: int,
     data: ProfesorUpdate,
-    service: ProfesorService = Depends(get_profesor_service),
-    user: User = Depends(user_is_staff),
+    service: Annotated[ProfesorService, Depends(get_profesor_service)],
+    user: Annotated[User, Depends(user_is_staff)],
 ):
     return service.update_profesor(profesor_id, data)
 
@@ -63,8 +65,8 @@ async def update_profesor(
 async def update_profesor_partial(
     profesor_id: int,
     data: ProfesorUpdate,
-    service: ProfesorService = Depends(get_profesor_service),
-    user: User = Depends(user_is_staff),
+    service: Annotated[ProfesorService, Depends(get_profesor_service)],
+    user: Annotated[User, Depends(user_is_staff)],
 ):
     return service.update_profesor(profesor_id, data)
 
@@ -72,7 +74,7 @@ async def update_profesor_partial(
 @router.delete("/{profesor_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_profesor(
     profesor_id: int,
-    service: ProfesorService = Depends(get_profesor_service),
-    user: User = Depends(user_is_staff),
+    service: Annotated[ProfesorService, Depends(get_profesor_service)],
+    user: Annotated[User, Depends(user_is_staff)],
 ):
     service.delete_profesor(profesor_id)

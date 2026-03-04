@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, Query, status
 
 from app.api.dependencies.auth import user_is_staff
@@ -15,8 +17,8 @@ router = APIRouter()
 @router.post("/", response_model=EdificioRead, status_code=status.HTTP_201_CREATED)
 async def create_edificio(
     data: EdificioCreate,
-    service: EdificioService = Depends(get_edificio_service),
-    user: User = Depends(user_is_staff),
+    service: Annotated[EdificioService, Depends(get_edificio_service)],
+    user: Annotated[User, Depends(user_is_staff)],
 ):
     return service.create_edificio(data)
 
@@ -24,19 +26,19 @@ async def create_edificio(
 @router.get("/{edificio_id}", response_model=EdificioRead)
 async def get_edificio(
     edificio_id: int,
-    service: EdificioService = Depends(get_edificio_service),
+    service: Annotated[EdificioService, Depends(get_edificio_service)],
 ):
     return service.get_edificio(edificio_id)
 
 
 @router.get("/", response_model=Pagination[EdificioRead])
 async def list_edificios(
+    service: Annotated[EdificioService, Depends(get_edificio_service)],
     centro_id: int | None = None,
     name: str | None = None,
     search: str | None = None,
-    skip: int = 0,
+    skip: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=1, le=100),
-    service: EdificioService = Depends(get_edificio_service),
 ):
     edificios, total = service.list_edificios(
         centro_id=centro_id,
@@ -55,8 +57,8 @@ async def list_edificios(
 async def update_edificio(
     edificio_id: int,
     data: EdificioUpdate,
-    service: EdificioService = Depends(get_edificio_service),
-    user: User = Depends(user_is_staff),
+    service: Annotated[EdificioService, Depends(get_edificio_service)],
+    user: Annotated[User, Depends(user_is_staff)],
 ):
     return service.update_edificio(edificio_id, data)
 
@@ -65,8 +67,8 @@ async def update_edificio(
 async def update_edificio_partial(
     edificio_id: int,
     data: EdificioUpdate,
-    service: EdificioService = Depends(get_edificio_service),
-    user: User = Depends(user_is_staff),
+    service: Annotated[EdificioService, Depends(get_edificio_service)],
+    user: Annotated[User, Depends(user_is_staff)],
 ):
     return service.update_edificio(edificio_id, data)
 
@@ -74,7 +76,7 @@ async def update_edificio_partial(
 @router.delete("/{edificio_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_edificio(
     edificio_id: int,
-    service: EdificioService = Depends(get_edificio_service),
-    user: User = Depends(user_is_staff),
+    service: Annotated[EdificioService, Depends(get_edificio_service)],
+    user: Annotated[User, Depends(user_is_staff)],
 ):
     service.delete_edificio(edificio_id)

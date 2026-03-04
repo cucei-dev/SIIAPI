@@ -6,7 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from app.core.config import settings
-from app.core.exceptions import ConflictException, NotFoundException
+from app.core.exceptions import NotFoundException
 from app.modules.aula.schemas import AulaCreate
 from app.modules.aula.services.aula_service import AulaService
 from app.modules.calendario.services.calendario_service import \
@@ -240,20 +240,20 @@ class TasksService:
     ) -> int:
         """Create clases for a seccion from multiple session records. Returns number of clases created"""
         clases_creadas = 0
-        
+
         for data in data_list:
             # Skip if no schedule data
             if not data.Horas or not data.Dias:
                 continue
-                
+
             hora_inicio, hora_fin = self._parse_horas(data.Horas)
             dias = self._parse_dias(data.Dias)
-            
+
             # Get or create edificio and aula for this session
             aula_id = None
             if data.Edificio and data.Edificio != "":
                 edificio, _ = self._get_or_create_edificio(data.Edificio, centro_id)
-                
+
                 if data.Aula and data.Aula != "":
                     aula, _ = self._get_or_create_aula(data.Aula, edificio.id)
                     aula_id = aula.id
@@ -376,7 +376,7 @@ class TasksService:
                 data_list, seccion.id, centro_id
             )
             stats["clases_creadas"] = clases_creadas
-            
+
             # Count unique edificios and aulas created
             edificios_vistos = set()
             aulas_vistas = set()
@@ -389,7 +389,7 @@ class TasksService:
                         )
                         if count == 0:
                             stats["edificios_creados"] += 1
-                    
+
                     if session_data.Aula and session_data.Aula != "":
                         aula_key = f"{session_data.Edificio}:{session_data.Aula}"
                         if aula_key not in aulas_vistas:
@@ -399,7 +399,8 @@ class TasksService:
                             )
                             if edificios_db:
                                 aulas_db, count = self.aula_service.list_aulas(
-                                    name=session_data.Aula, edificio_id=edificios_db[0].id
+                                    name=session_data.Aula,
+                                    edificio_id=edificios_db[0].id,
                                 )
                                 if count == 0:
                                     stats["aulas_creadas"] += 1
@@ -437,7 +438,9 @@ class TasksService:
 
         # Process each seccion with all its session records
         for nrc, registros in secciones_agrupadas.items():
-            stats = self._process_seccion(registros, calendario_id, centro_id, update_if_exists, full_update)
+            stats = self._process_seccion(
+                registros, calendario_id, centro_id, update_if_exists, full_update
+            )
 
             if stats["error"]:
                 total_stats["errores"] += 1
@@ -456,7 +459,11 @@ class TasksService:
         return total_stats
 
     def get_secciones(
-        self, calendario_id: int, centro_id: int, update_existing: bool = False, full_update: bool = False
+        self,
+        calendario_id: int,
+        centro_id: int,
+        update_existing: bool = False,
+        full_update: bool = False,
     ):
         """
         Fetch and save secciones from SIIAU.
@@ -480,11 +487,18 @@ class TasksService:
 
         # Process all secciones with update flag
         return self.save_secciones(
-            secciones, calendario.id, centro.id, update_if_exists=update_existing, full_update=full_update
+            secciones,
+            calendario.id,
+            centro.id,
+            update_if_exists=update_existing,
+            full_update=full_update,
         )
 
     def update_all_secciones(
-        self, calendario_id: int, centro_id: int, full_update: bool = False,
+        self,
+        calendario_id: int,
+        centro_id: int,
+        full_update: bool = False,
     ) -> dict[str, int]:
         """
         Update all existing secciones with fresh data from SIIAU.
@@ -497,4 +511,6 @@ class TasksService:
         Returns:
             Dictionary with statistics of the operation
         """
-        return self.get_secciones(calendario_id, centro_id, update_existing=True, full_update=full_update)
+        return self.get_secciones(
+            calendario_id, centro_id, update_existing=True, full_update=full_update
+        )

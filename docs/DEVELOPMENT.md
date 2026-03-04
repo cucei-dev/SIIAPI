@@ -224,7 +224,7 @@ from typing import Optional, List
 
 def get_users(
     db: Session,
-    skip: int = 0,
+    skip: int = Query(default=0, ge=0),
     limit: int = 10
 ) -> List[User]:
     return db.query(User).offset(skip).limit(limit).all()
@@ -332,7 +332,7 @@ def create_user(db: Session, user: UserCreate) -> User:
        def get(self, model_id: int) -> Optional[NewModel]:
            return self.db.get(NewModel, model_id)
 
-       def list(self, filters: dict = None, skip: int = 0, limit: int = 10):
+       def list(self, filters: dict = None, skip: int = Query(default=0, ge=0), limit: int = 10):
            query = select(NewModel)
            
            if filters:

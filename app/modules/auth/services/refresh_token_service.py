@@ -2,7 +2,7 @@ from app.core.exceptions import ConflictException, NotFoundException
 from app.modules.auth.models import RefreshToken
 from app.modules.auth.repositories.refresh_token_repository import \
     RefreshTokenRepository
-from app.modules.auth.schemas import RefreshTokenCreate, RefreshTokenUpdate
+from app.modules.auth.schemas import RefreshTokenCreate
 from app.modules.users.repositories.user_repository import UserRepository
 
 

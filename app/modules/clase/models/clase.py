@@ -1,7 +1,7 @@
 from datetime import time
 
 from pydantic import ConfigDict
-from sqlmodel import JSON, Column, Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
 
 
 class Clase(SQLModel, table=True):

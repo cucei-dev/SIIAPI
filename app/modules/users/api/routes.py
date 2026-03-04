@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, Query, status
 
 from app.api.dependencies.auth import user_is_superuser
@@ -14,8 +16,8 @@ router = APIRouter()
 @router.post("/", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 async def create_user(
     data: UserCreate,
-    service: UserService = Depends(get_user_service),
-    user: User = Depends(user_is_superuser),
+    service: Annotated[UserService, Depends(get_user_service)],
+    user: Annotated[User, Depends(user_is_superuser)],
 ):
     return service.create_user(data)
 
@@ -23,23 +25,23 @@ async def create_user(
 @router.get("/{user_id}", response_model=UserRead)
 async def get_user(
     user_id: int,
-    service: UserService = Depends(get_user_service),
-    user: User = Depends(user_is_superuser),
+    service: Annotated[UserService, Depends(get_user_service)],
+    user: Annotated[User, Depends(user_is_superuser)],
 ):
     return service.get_user(user_id)
 
 
 @router.get("/", response_model=Pagination[UserRead])
 async def list_users(
+    service: Annotated[UserService, Depends(get_user_service)],
+    user: Annotated[User, Depends(user_is_superuser)],
     email: str | None = None,
     is_active: bool | None = None,
     is_superuser: bool | None = None,
     is_staff: bool | None = None,
     search: str | None = None,
-    skip: int = 0,
+    skip: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=1, le=100),
-    service: UserService = Depends(get_user_service),
-    user: User = Depends(user_is_superuser),
 ):
     users, total = service.list_users(
         email=email,
@@ -60,8 +62,8 @@ async def list_users(
 async def update_user(
     user_id: int,
     data: UserUpdate,
-    service: UserService = Depends(get_user_service),
-    user: User = Depends(user_is_superuser),
+    service: Annotated[UserService, Depends(get_user_service)],
+    user: Annotated[User, Depends(user_is_superuser)],
 ):
     return service.update_user(user_id, data)
 
@@ -70,8 +72,8 @@ async def update_user(
 async def update_user_partial(
     user_id: int,
     data: UserUpdate,
-    service: UserService = Depends(get_user_service),
-    user: User = Depends(user_is_superuser),
+    service: Annotated[UserService, Depends(get_user_service)],
+    user: Annotated[User, Depends(user_is_superuser)],
 ):
     return service.update_user(user_id, data)
 
@@ -79,8 +81,8 @@ async def update_user_partial(
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def soft_delete_user(
     user_id: int,
-    service: UserService = Depends(get_user_service),
-    user: User = Depends(user_is_superuser),
+    service: Annotated[UserService, Depends(get_user_service)],
+    user: Annotated[User, Depends(user_is_superuser)],
 ):
     service.delete_user(user_id)
 
@@ -88,7 +90,7 @@ async def soft_delete_user(
 @router.delete("/{user_id}/hard", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
     user_id: int,
-    service: UserService = Depends(get_user_service),
-    user: User = Depends(user_is_superuser),
+    service: Annotated[UserService, Depends(get_user_service)],
+    user: Annotated[User, Depends(user_is_superuser)],
 ):
     service.hard_delete_user(user_id)

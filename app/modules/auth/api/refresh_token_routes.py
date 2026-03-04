@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, Query, status
 
 from app.api.dependencies.auth import user_is_superuser
@@ -14,8 +16,8 @@ router = APIRouter()
 @router.post("/", response_model=RefreshTokenRead, status_code=status.HTTP_201_CREATED)
 async def create_refresh_token(
     data: RefreshTokenCreate,
-    service: RefreshTokenService = Depends(get_refresh_token_service),
-    user: User = Depends(user_is_superuser),
+    service: Annotated[RefreshTokenService, Depends(get_refresh_token_service)],
+    user: Annotated[User, Depends(user_is_superuser)],
 ):
     return service.create_refresh_token(data)
 
@@ -23,18 +25,18 @@ async def create_refresh_token(
 @router.get("/{refresh_token_jti}", response_model=RefreshTokenRead)
 async def get_refresh_token(
     refresh_token_jti: str,
-    service: RefreshTokenService = Depends(get_refresh_token_service),
-    user: User = Depends(user_is_superuser),
+    service: Annotated[RefreshTokenService, Depends(get_refresh_token_service)],
+    user: Annotated[User, Depends(user_is_superuser)],
 ):
     return service.get_refresh_token(refresh_token_jti)
 
 
 @router.get("/", response_model=Pagination[RefreshTokenRead])
 async def list_refresh_tokens(
-    skip: int = 0,
+    service: Annotated[RefreshTokenService, Depends(get_refresh_token_service)],
+    user: Annotated[User, Depends(user_is_superuser)],
+    skip: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=1, le=100),
-    service: RefreshTokenService = Depends(get_refresh_token_service),
-    user: User = Depends(user_is_superuser),
 ):
     refresh_tokens, total = service.list_refresh_tokens(
         skip=skip,
@@ -49,8 +51,8 @@ async def list_refresh_tokens(
 @router.delete("/{refresh_token_jti}", status_code=status.HTTP_204_NO_CONTENT)
 async def soft_delete_refresh_token(
     refresh_token_jti: str,
-    service: RefreshTokenService = Depends(get_refresh_token_service),
-    user: User = Depends(user_is_superuser),
+    service: Annotated[RefreshTokenService, Depends(get_refresh_token_service)],
+    user: Annotated[User, Depends(user_is_superuser)],
 ):
     service.delete_refresh_token(refresh_token_jti)
 
@@ -58,7 +60,7 @@ async def soft_delete_refresh_token(
 @router.delete("/{refresh_token_jti}/hard", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_refresh_token(
     refresh_token_jti: str,
-    service: RefreshTokenService = Depends(get_refresh_token_service),
-    user: User = Depends(user_is_superuser),
+    service: Annotated[RefreshTokenService, Depends(get_refresh_token_service)],
+    user: Annotated[User, Depends(user_is_superuser)],
 ):
     service.hard_delete_refresh_token(refresh_token_jti)

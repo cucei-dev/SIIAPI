@@ -1,4 +1,5 @@
 from datetime import time
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, status
 
@@ -16,8 +17,8 @@ router = APIRouter()
 @router.post("/", response_model=ClaseRead, status_code=status.HTTP_201_CREATED)
 async def create_clase(
     data: ClaseCreate,
-    service: ClaseService = Depends(get_clase_service),
-    user: User = Depends(user_is_staff),
+    service: Annotated[ClaseService, Depends(get_clase_service)],
+    user: Annotated[User, Depends(user_is_staff)],
 ):
     return service.create_clase(data)
 
@@ -25,22 +26,22 @@ async def create_clase(
 @router.get("/{clase_id}", response_model=ClaseRead)
 async def get_clase(
     clase_id: int,
-    service: ClaseService = Depends(get_clase_service),
+    service: Annotated[ClaseService, Depends(get_clase_service)],
 ):
     return service.get_clase(clase_id)
 
 
 @router.get("/", response_model=Pagination[ClaseRead])
 async def list_clases(
+    service: Annotated[ClaseService, Depends(get_clase_service)],
     seccion_id: int | None = None,
     aula_id: int | None = None,
     hora_inicio: time | None = None,
     hora_fin: time | None = None,
     dia: int | None = None,
     search: str | None = None,
-    skip: int = 0,
+    skip: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=1, le=100),
-    service: ClaseService = Depends(get_clase_service),
 ):
     clases, total = service.list_clases(
         seccion_id=seccion_id,
@@ -62,8 +63,8 @@ async def list_clases(
 async def update_clase(
     clase_id: int,
     data: ClaseUpdate,
-    service: ClaseService = Depends(get_clase_service),
-    user: User = Depends(user_is_staff),
+    service: Annotated[ClaseService, Depends(get_clase_service)],
+    user: Annotated[User, Depends(user_is_staff)],
 ):
     return service.update_clase(clase_id, data)
 
@@ -72,8 +73,8 @@ async def update_clase(
 async def update_clase_partial(
     clase_id: int,
     data: ClaseUpdate,
-    service: ClaseService = Depends(get_clase_service),
-    user: User = Depends(user_is_staff),
+    service: Annotated[ClaseService, Depends(get_clase_service)],
+    user: Annotated[User, Depends(user_is_staff)],
 ):
     return service.update_clase(clase_id, data)
 
@@ -81,7 +82,7 @@ async def update_clase_partial(
 @router.delete("/{clase_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_clase(
     clase_id: int,
-    service: ClaseService = Depends(get_clase_service),
-    user: User = Depends(user_is_staff),
+    service: Annotated[ClaseService, Depends(get_clase_service)],
+    user: Annotated[User, Depends(user_is_staff)],
 ):
     service.delete_clase(clase_id)

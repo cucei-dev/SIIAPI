@@ -1,0 +1,5 @@
+E501 line too long
+app/core/database.py
+F821 undefined name
+ReadMinimal
+tests
