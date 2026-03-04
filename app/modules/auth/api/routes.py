@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, status
 from typing import Annotated
+
+from fastapi import APIRouter, Depends, status
 
 from app.api.dependencies.auth import get_current_user_strict
 from app.modules.auth.schemas import (LoginData, LoginResponse,

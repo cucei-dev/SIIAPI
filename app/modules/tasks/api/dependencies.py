@@ -18,7 +18,6 @@ from app.modules.profesor.api.dependencies import get_profesor_service
 from app.modules.profesor.services.profesor_service import ProfesorService
 from app.modules.seccion.api.dependencies import get_seccion_service
 from app.modules.seccion.services.seccion_service import SeccionService
-from app.modules.tasks.schemas.siiau import SeccionSiiau
 from app.modules.tasks.services.task_service import TasksService
 
 

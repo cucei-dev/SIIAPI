@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, Query, status
 from typing import Annotated
+
+from fastapi import APIRouter, Depends, Query, status
 
 from app.api.dependencies.auth import user_is_staff
 from app.api.schemas import Pagination

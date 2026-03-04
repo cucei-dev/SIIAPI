@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends
 from typing import Annotated
+
+from fastapi import APIRouter, Depends
 
 from app.api.dependencies.auth import user_is_staff
 from app.modules.tasks.services.task_service import TasksService

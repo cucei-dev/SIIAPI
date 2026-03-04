@@ -3,8 +3,7 @@ from datetime import datetime
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from app.core.exceptions import (ForbiddenException, NotFoundException,
-                                 UnauthorizedException)
+from app.core.exceptions import ForbiddenException, UnauthorizedException
 from app.core.security import check_token
 from app.modules.auth.api.dependencies import get_refresh_token_service
 from app.modules.auth.services.refresh_token_service import RefreshTokenService
