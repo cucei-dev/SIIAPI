@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from typing import Annotated
 
 from app.api.dependencies.auth import user_is_staff
 from app.modules.tasks.services.task_service import TasksService
@@ -13,8 +14,8 @@ router = APIRouter()
 async def importar_secciones(
     calendario_id: int,
     centro_id: int,
-    service: TasksService = Depends(get_tasks_service),
-    user: User = Depends(user_is_staff),
+    service: Annotated[TasksService, Depends(get_tasks_service)],
+    user: Annotated[User, Depends(user_is_staff)],
 ):
     return service.get_secciones(
         calendario_id=calendario_id,
@@ -26,9 +27,9 @@ async def importar_secciones(
 async def actualizar_secciones(
     calendario_id: int,
     centro_id: int,
+    service: Annotated[TasksService, Depends(get_tasks_service)],
+    user: Annotated[User, Depends(user_is_staff)],
     full_update: bool = False,
-    service: TasksService = Depends(get_tasks_service),
-    user: User = Depends(user_is_staff),
 ):
     return service.update_all_secciones(
         calendario_id=calendario_id,
@@ -41,10 +42,10 @@ async def importar_secciones_manual(
     data: list[dict],
     calendario_id: int,
     centro_id: int,
+    service: Annotated[TasksService, Depends(get_tasks_service)],
+    user: Annotated[User, Depends(user_is_staff)],
     update: bool = False,
     full_update: bool = False,
-    service: TasksService = Depends(get_tasks_service),
-    user: User = Depends(user_is_staff),
 ):
     return service.save_secciones(
         data=data,

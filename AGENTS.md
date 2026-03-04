@@ -126,7 +126,7 @@ Always use type hints for function signatures:
 def get_user(user_id: int) -> User | None:
     ...
 
-def list_users(email: str | None = None, skip: int = 0, limit: int = 100) -> tuple[list[User], int]:
+def list_users(email: str | None = None, skip: int = Query(default=0, ge=0), limit: int = 100) -> tuple[list[User], int]:
     ...
 
 # Bad (no types)
@@ -217,7 +217,7 @@ router = APIRouter()
 
 @router.get("/", response_model=Pagination[UserRead])
 async def list_users(
-    skip: int = 0,
+    skip: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=1, le=100),
     service: UserService = Depends(get_user_service),
 ):

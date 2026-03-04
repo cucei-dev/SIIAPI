@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Query, status
+from typing import Annotated
 
 from app.api.dependencies.auth import user_is_staff
 from app.api.schemas import Pagination
@@ -15,8 +16,8 @@ router = APIRouter()
 @router.post("/", response_model=MateriaRead, status_code=status.HTTP_201_CREATED)
 async def create_materia(
     data: MateriaCreate,
-    service: MateriaService = Depends(get_materia_service),
-    user: User = Depends(user_is_staff),
+    service: Annotated[MateriaService, Depends(get_materia_service)],
+    user: Annotated[User, Depends(user_is_staff)],
 ):
     return service.create_materia(data)
 
@@ -24,18 +25,18 @@ async def create_materia(
 @router.get("/{materia_id}", response_model=MateriaRead)
 async def get_materia(
     materia_id: int,
-    service: MateriaService = Depends(get_materia_service),
+    service: Annotated[MateriaService, Depends(get_materia_service)],
 ):
     return service.get_materia(materia_id)
 
 
 @router.get("/", response_model=Pagination[MateriaRead])
 async def list_materias(
+    service: Annotated[MateriaService, Depends(get_materia_service)],
     clave: str | None = None,
     search: str | None = None,
-    skip: int = 0,
+    skip: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=1, le=100),
-    service: MateriaService = Depends(get_materia_service),
 ):
     materias, total = service.list_materias(
         clave=clave,
@@ -53,8 +54,8 @@ async def list_materias(
 async def update_materia(
     materia_id: int,
     data: MateriaUpdate,
-    service: MateriaService = Depends(get_materia_service),
-    user: User = Depends(user_is_staff),
+    service: Annotated[MateriaService, Depends(get_materia_service)],
+    user: Annotated[User, Depends(user_is_staff)],
 ):
     return service.update_materia(materia_id, data)
 
@@ -63,8 +64,8 @@ async def update_materia(
 async def update_materia_partial(
     materia_id: int,
     data: MateriaUpdate,
-    service: MateriaService = Depends(get_materia_service),
-    user: User = Depends(user_is_staff),
+    service: Annotated[MateriaService, Depends(get_materia_service)],
+    user: Annotated[User, Depends(user_is_staff)],
 ):
     return service.update_materia(materia_id, data)
 
@@ -72,7 +73,7 @@ async def update_materia_partial(
 @router.delete("/{materia_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_materia(
     materia_id: int,
-    service: MateriaService = Depends(get_materia_service),
-    user: User = Depends(user_is_staff),
+    service: Annotated[MateriaService, Depends(get_materia_service)],
+    user: Annotated[User, Depends(user_is_staff)],
 ):
     service.delete_materia(materia_id)

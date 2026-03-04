@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Query, status
+from typing import Annotated
 
 from app.api.dependencies.auth import user_is_staff
 from app.api.schemas import Pagination
@@ -19,8 +20,8 @@ router = APIRouter()
 )
 async def create_centro(
     data: CentroUniversitarioCreate,
-    service: CentroUniversitarioService = Depends(get_centro_service),
-    user: User = Depends(user_is_staff),
+    service: Annotated[CentroUniversitarioService, Depends(get_centro_service)],
+    user: Annotated[User, Depends(user_is_staff)],
 ):
     return service.create_centro(data)
 
@@ -28,18 +29,18 @@ async def create_centro(
 @router.get("/{centro_id}", response_model=CentroUniversitarioRead)
 async def get_centro(
     centro_id: int,
-    service: CentroUniversitarioService = Depends(get_centro_service),
+    service: Annotated[CentroUniversitarioService, Depends(get_centro_service)],
 ):
     return service.get_centro(centro_id)
 
 
 @router.get("/", response_model=Pagination[CentroUniversitarioRead])
 async def list_centros(
+    service: Annotated[CentroUniversitarioService, Depends(get_centro_service)],
     siiau_id: int | None = None,
     search: str | None = None,
-    skip: int = 0,
+    skip: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=1, le=100),
-    service: CentroUniversitarioService = Depends(get_centro_service),
 ):
     centros, total = service.list_centros(
         siiau_id=siiau_id,
@@ -57,8 +58,8 @@ async def list_centros(
 async def update_centro(
     centro_id: int,
     data: CentroUniversitarioUpdate,
-    service: CentroUniversitarioService = Depends(get_centro_service),
-    user: User = Depends(user_is_staff),
+    service: Annotated[CentroUniversitarioService, Depends(get_centro_service)],
+    user: Annotated[User, Depends(user_is_staff)],
 ):
     return service.update_centro(centro_id, data)
 
@@ -67,8 +68,8 @@ async def update_centro(
 async def update_centro_partial(
     centro_id: int,
     data: CentroUniversitarioUpdate,
-    service: CentroUniversitarioService = Depends(get_centro_service),
-    user: User = Depends(user_is_staff),
+    service: Annotated[CentroUniversitarioService, Depends(get_centro_service)],
+    user: Annotated[User, Depends(user_is_staff)],
 ):
     return service.update_centro(centro_id, data)
 
@@ -76,7 +77,7 @@ async def update_centro_partial(
 @router.delete("/{centro_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_centro(
     centro_id: int,
-    service: CentroUniversitarioService = Depends(get_centro_service),
-    user: User = Depends(user_is_staff),
+    service: Annotated[CentroUniversitarioService, Depends(get_centro_service)],
+    user: Annotated[User, Depends(user_is_staff)],
 ):
     service.delete_centro(centro_id)
