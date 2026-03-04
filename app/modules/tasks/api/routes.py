@@ -23,7 +23,7 @@ async def importar_secciones(
 
 
 @router.get("/actualizar-secciones")
-async def importar_secciones(
+async def actualizar_secciones(
     calendario_id: int,
     centro_id: int,
     full_update: bool = False,
