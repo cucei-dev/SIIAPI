@@ -45,11 +45,3 @@ class SeccionRead(SeccionReadMinimal):
     profesor: Optional["ProfesorReadMinimal"]
     calendario: "CalendarioReadMinimal"
     clases: list["ClaseReadMinimal"]
-
-    @field_validator("clases", mode="before")
-    @classmethod
-    def limit_clases(cls, v):
-        """Limit the number of clases returned to a maximum of 10"""
-        if isinstance(v, list) and len(v) > 10:
-            return v[:10]
-        return v

@@ -24,7 +24,7 @@ class CentroUniversitarioRead(CentroUniversitarioReadMinimal):
     secciones: list["SeccionReadMinimal"]
     edificios: list["EdificioReadMinimal"]
 
-    @field_validator("secciones", "edificios", mode="before")
+    @field_validator("secciones", mode="before")
     @classmethod
     def limit_lists(cls, v):
         """Limit the number of items returned to a maximum of 10"""
