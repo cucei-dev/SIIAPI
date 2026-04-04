@@ -35,6 +35,7 @@ async def actualizar_secciones(
     return service.update_all_secciones(
         calendario_id=calendario_id,
         centro_id=centro_id,
+        full_update=full_update,
     )
 
 
