@@ -1,0 +1,30 @@
+[project]
+name = "siiapi"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "alembic>=1.18.4",
+    "beautifulsoup4>=4.14.3",
+    "fastapi[standard]>=0.135.3",
+    "passlib>=1.7.4",
+    "psycopg2-binary>=2.9.11",
+    "python-jose>=3.5.0",
+    "requests>=2.33.1",
+    "shieldcipher>=1.2.1",
+    "sqlmodel>=0.0.38",
+]
+
+[dependency-groups]
+dev = [
+    "black>=26.3.1",
+    "faker>=40.13.0",
+    "flake8>=7.3.0",
+    "httpx>=0.28.1",
+    "isort>=8.0.1",
+    "pytest>=9.0.2",
+    "pytest-asyncio>=1.3.0",
+    "pytest-cov>=7.1.0",
+    "pytest-mock>=3.15.1",
+]
