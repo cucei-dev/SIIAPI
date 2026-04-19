@@ -1,7 +1,7 @@
 [project]
 name = "siiapi"
-version = "0.1.0"
-description = "Add your description here"
+version = "1.2.5"
+description = "API del Sistema Integral de Información y Administración Universitaria"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
