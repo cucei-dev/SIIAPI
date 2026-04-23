@@ -1,274 +1,60 @@
-# AGENTS.md - Development Guidelines for SIIAPI
+# AGENTS.md — Essential Guidance for SIIAPI
 
-## Overview
-
-SIIAPI is a FastAPI-based REST API for managing university academic information. This file contains guidelines for agentic coding agents working on this codebase.
-
-## Project Structure
-
-```
-SIIAPI/
-├── app/
-│   ├── api/           # API routes and dependencies
-│   ├── core/         # Core utilities (config, database, security, exceptions)
-│   └── modules/      # Feature modules (auth, users, clase, edificio, etc.)
-├── tests/
-│   ├── unit/         # Unit tests
-│   └── integration/  # Integration tests
-├── alembic/          # Database migrations
-└── scripts/          # Utility scripts
-```
-
-Each module follows: `api/routes.py`, `models/`, `repositories/`, `schemas/`, `services/`
+This repo is a modular FastAPI + SQLModel REST API for university academic data (SIIAU integration, multi-module, JWT auth). This file is for OpenCode and similar coding agents. **Keep this file ruthlessly compact and surgery-focused.**
 
 ---
 
-## Commands
+## High-Signal Conventions
 
-### Installation
-```bash
-make install          # Install all dependencies
-```
-
-### Running the Application
-```bash
-make dev             # Start dev server with uvicorn (recommended)
-fastapi dev app/main.py  # Alternative: use fastapi CLI
-```
-
-### Testing
-```bash
-make test            # Run all tests
-make test-unit       # Run unit tests only
-make test-integration  # Run integration tests only
-make test-cov       # Run tests with coverage report
-```
-
-**Running a single test:**
-```bash
-# Run specific test file
-pytest tests/unit/users/test_user_service.py
-
-# Run specific test class
-pytest tests/unit/users/test_user_service.py::TestUserServiceCreate
-
-# Run specific test function
-pytest tests/unit/users/test_user_service.py::TestUserServiceCreate::test_create_user_success
-
-# Run by marker
-pytest -m unit
-pytest -m integration
-```
-
-### Linting & Formatting
-```bash
-make lint            # Run flake8, black --check, isort --check-only
-make format          # Run black and isort
-```
-
-### Database
-```bash
-make db-init         # Initialize database (dev mode)
-make db-seed         # Seed database with test data
-make migrate         # Run Alembic migrations
-make migrate-create  # Create new migration (autogenerate)
-```
+- **Never guess commands**. Use `make` targets or `dev.sh` when available—these are source of truth for all build, test, lint, and DB flows.
+- **Dev database is wiped** by `dev.sh` (removes `db.sqlite3` before launch). Do not use in production.
+- **Config always via `.env`**; see `.env.example` for required names. Do not hardcode secrets. All settings are loaded by `app/core/config.py` at startup.
+    - `APP_DEBUG=true` — Uses `SQLModel.metadata.create_all()`, runs seed data on start, ignores Alembic.
+    - `APP_DEBUG=false` — Uses Alembic on app start, seed only via `make db-seed` or the manual script.
+- **Seeding**: Only run `make db-seed` or `python scripts/seed_database.py`; does not run automatically in production. Seeds just the admin user (see `app/core/seed.py`).
+- **Database migrations**: Run only via `make migrate`, `make migrate-create`, etc. in production. See `alembic/README.md` for edge cases/recovery commands.
+- **Makefile targets always reflect reality.** If they drift, update Makefile and this file.
 
 ---
 
-## Code Style Guidelines
+## Key Commands (copy/paste-ready)
 
-### General Principles
-- Use **Python 3.10+** features (type hints, match/case)
-- Follow **SOLID** principles and separation of concerns
-- Keep functions small and focused (< 50 lines when possible)
-- Use **async/await** for I/O-bound operations
-
-### Imports
-
-**Order (use `isort` to enforce):**
-1. Standard library
-2. Third-party packages
-3. Local application imports
-
-```python
-# Standard library
-from datetime import datetime
-from typing import Generator
-
-# Third-party
-from fastapi import APIRouter, Depends
-from sqlmodel import Session, select
-
-# Local application
-from app.core.exceptions import NotFoundException
-from app.modules.users.models import User
-from app.modules.users.schemas import UserCreate
-```
-
-### Naming Conventions
-
-| Element | Convention | Example |
-|---------|------------|---------|
-| Modules | snake_case | `user_service.py` |
-| Classes | PascalCase | `UserService` |
-| Functions | snake_case | `get_user()` |
-| Variables | snake_case | `user_id` |
-| Constants | UPPER_SNAKE | `MAX_RETRY_COUNT` |
-| Database tables | PascalCase | `User` (SQLModel) |
-
-### Type Hints
-
-Always use type hints for function signatures:
-
-```python
-# Good
-def get_user(user_id: int) -> User | None:
-    ...
-
-def list_users(email: str | None = None, skip: int = Query(default=0, ge=0), limit: int = 100) -> tuple[list[User], int]:
-    ...
-
-# Bad (no types)
-def get_user(user_id):
-    ...
-```
-
-Use `|` instead of `Union` for Python 3.10+:
-```python
-# Good
-user_id: int | None
-
-# Avoid
-user_id: Optional[int]
-```
-
-### Error Handling
-
-Use custom exceptions from `app/core/exceptions.py`:
-
-```python
-from app.core.exceptions import (
-    BadRequestException,
-    NotFoundException,
-    ConflictException,
-    UnauthorizedException,
-    ForbiddenException,
-)
-
-# In services
-def get_user(self, user_id: int) -> User:
-    user = self.repository.get(user_id)
-    if not user:
-        raise NotFoundException("User not found.")
-    return user
-```
-
-### Pydantic Schemas
-
-- Use `BaseModel` or SQLModel for request/response validation
-- Use `Field()` for validation and constraints
-- Use `ConfigDict(from_attributes=True)` for ORM compatibility
-
-```python
-from pydantic import ConfigDict, Field
-from sqlmodel import SQLModel
-
-class UserCreate(SQLModel):
-    name: str = Field(min_length=1, max_length=100)
-    email: str = Field(pattern=r"^[\w\.-]+@[\w\.-]+\.\w+$")
-    password: str = Field(min_length=8)
-
-    model_config = ConfigDict(from_attributes=True)
-```
-
-### Database Access (Repository Pattern)
-
-Always use the repository pattern for data access:
-
-```python
-# Repository layer
-class UserRepository:
-    def __init__(self, session: Session):
-        self.session = session
-
-    def get(self, user_id: int) -> User | None:
-        statement = select(User).where(User.id == user_id)
-        return self.session.exec(statement).first()
-
-# Service layer (uses repository)
-class UserService:
-    def __init__(self, repository: UserRepository):
-        self.repository = repository
-
-    def get_user(self, user_id: int) -> User:
-        user = self.repository.get(user_id)
-        if not user:
-            raise NotFoundException("User not found.")
-        return user
-```
-
-### API Routes
-
-```python
-from fastapi import APIRouter, Depends, Query, status
-
-router = APIRouter()
-
-@router.get("/", response_model=Pagination[UserRead])
-async def list_users(
-    skip: int = Query(default=0, ge=0),
-    limit: int = Query(default=100, ge=1, le=100),
-    service: UserService = Depends(get_user_service),
-):
-    users, total = service.list_users(skip=skip, limit=limit)
-    return Pagination(total=total, results=users)
-```
-
-### Testing Guidelines
-
-- Mark tests with pytest markers: `@pytest.mark.unit` or `@pytest.mark.integration`
-- Use fixtures from `tests/conftest.py`
-- Use descriptive test names: `test_create_user_success`, `test_create_user_duplicate_email`
-
-```python
-@pytest.mark.unit
-class TestUserServiceCreate:
-    def test_create_user_success(self, session: Session):
-        """Test successful user creation"""
-        ...
-```
-
-### Configuration
-
-All configuration goes in `app/core/config.py`. Use environment variables:
-
-```python
-class Settings:
-    DB_URL: str = os.getenv("DB_URL", "sqlite:///./db.sqlite3")
-    APP_DEBUG: bool = get_bool(os.getenv("APP_DEBUG", "true"))
-    SECRET_KEY: str = os.getenv("SECRET_KEY")
-
-settings = Settings()
-```
+- `make install` — Install all test/dev dependencies (uses `requirements-test.txt`).
+- `make dev` — Launch dev server (`uvicorn ... --reload`).
+- `./dev.sh` — Wipes DB, launches in development mode (for new schemas, resets, demos only).
+- `make test / make test-unit / make test-integration / make test-cov` — Full, unit, integration, coverage.
+- `pytest ...` — Use direct pytest for class/function targeting (see `pytest.ini` for custom markers).
+- **Single test:** `pytest path/to/file.py::ClassName::test_func`
+- **Lint/format:** `make lint`, `make format`. Always check before PR.
+- **Database:**
+    - `make db-init` — Dev DB init via SQLModel.
+    - `make migrate` — Alembic to head (prod only).
+    - `make migrate-create` — Create migration after model changes (interactive message, see Makefile).
+    - `make db-seed` — Run seed script (admin user only by default).
 
 ---
 
-## Key Files
-
-- `app/main.py` - FastAPI application entry point
-- `app/core/config.py` - Application settings
-- `app/core/database.py` - Database initialization
-- `app/core/exceptions.py` - Custom HTTP exceptions
-- `app/core/security.py` - JWT and password utilities
-- `app/api/routes.py` - Main API router
-- `pytest.ini` - Pytest configuration
+## Testing Workflow Quirks
+- Test structure and expectations are defined in `tests/README.md`. Use markers (unit, integration, auth, database, slow) as shown in `pytest.ini` and README.
+- All test coverage options, fixtures, and strategies are documented in `tests/README.md`—do not duplicate here.
+- Pytest config (`pytest.ini`): strict markers are enforced.
 
 ---
 
-## Notes
+## Structure/Architecture
+- **Modules:** Each feature is under `app/modules/{feature}/` with subfolders for `api/`, `models/`, `repositories/`, `schemas/`, `services/`.
+- **Entrypoints:**
+    - App: `app/main.py`
+    - API routes: `app/api/routes.py`
+    - DB/init: `app/core/database.py`, migrations in `alembic/`
+    - Seed data: `app/core/seed.py` (called only from manual script)
+- **Production**: Strict .env required, DB migrations critical (do not use dev.sh or DB auto-create). Back up before migrations as per `alembic/README.md`.
 
-- The project uses **SQLModel** (combines SQLAlchemy + Pydantic)
-- Authentication uses JWT with refresh tokens
-- Development mode (`APP_DEBUG=true`) auto-creates tables and seeds data
-- Production uses Alembic migrations
+---
+
+## Update Process
+- Update this file *immediately* if Makefile, environment, seeding, or testing patterns change. Err on the side of deletion for any advice that becomes obvious or is codified elsewhere.
+
+---
+
+_If you are not sure whether a line belongs here, it probably doesn’t._
