@@ -11,6 +11,8 @@ Makefile
 README.md
 tests
 pytest.ini
+.agents
+skills-lock.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
