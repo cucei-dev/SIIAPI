@@ -13,17 +13,12 @@ from app.core.seed import seed_data
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    if settings.APP_DEBUG:
-        # In debug mode, use SQLModel's create_all for quick development
-        init_db()
-        seed_data()
-    else:
-        # In production, use Alembic migrations
-        run_migrations()
+    # In production, use Alembic migrations
+    run_migrations()
 
-        # Optionally seed data in production if DB_SEED_ON_STARTUP is True
-        if settings.DB_SEED_ON_STARTUP:
-            seed_data()
+    # Optionally seed data in production if DB_SEED_ON_STARTUP is True
+    if settings.DB_SEED_ON_STARTUP:
+        seed_data()
     yield
 
 

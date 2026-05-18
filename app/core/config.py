@@ -19,12 +19,12 @@ def get_float(value, default=0.0):
 
 
 class Settings:
-    DB_URL: str = os.getenv("DB_URL", "sqlite:///./db.sqlite3")
+    DB_URL: str = os.getenv("DB_URL", "postgresql://postgres:password@localhost:5432/postgres")
 
     APP_NAME: str = os.getenv("APP_NAME")
     APP_SITE: str = os.getenv("APP_SITE", "localhost")
     APP_ENV: str = os.getenv("APP_ENV", "dev")
-    APP_VERSION: str = "1.2.6"
+    APP_VERSION: str = "1.2.9"
     APP_DESCRIPTION: str = os.getenv("APP_DESCRIPTION")
     APP_DEBUG: bool = get_bool(os.getenv("APP_DEBUG", "true"))
 
