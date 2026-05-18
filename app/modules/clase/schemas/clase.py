@@ -5,7 +5,7 @@ from sqlmodel import SQLModel
 
 
 class ClaseBase(SQLModel):
-    sesion: int | None
+    sesion: str | None
     hora_inicio: time | None
     hora_fin: time | None
     dia: int | None
@@ -18,7 +18,7 @@ class ClaseCreate(ClaseBase):
 
 
 class ClaseUpdate(SQLModel):
-    sesion: int | None
+    sesion: str | None
     hora_inicio: time | None
     hora_fin: time | None
     dia: int | None

@@ -261,7 +261,7 @@ class TasksService:
             for dia in dias:
                 self.clase_service.create_clase(
                     ClaseCreate(
-                        sesion=int(data.SesionNum) if data.SesionNum else None,
+                        sesion=data.SesionNum if data.SesionNum else None,
                         hora_inicio=hora_inicio,
                         hora_fin=hora_fin,
                         dia=dia if dia != 0 else None,

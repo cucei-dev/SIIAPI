@@ -6,7 +6,7 @@ from sqlmodel import Field, Relationship, SQLModel
 
 class Clase(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    sesion: int | None = Field(default=None, nullable=True)
+    sesion: str | None = Field(default=None, nullable=True)
     hora_inicio: time | None = Field(default=None, nullable=True)
     hora_fin: time | None = Field(default=None, nullable=True)
     dia: int | None = Field(default=None, nullable=True)
