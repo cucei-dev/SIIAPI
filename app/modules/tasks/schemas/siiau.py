@@ -9,6 +9,7 @@ class SeccionSiiau(SQLModel):
     CR: int
     CUP: int
     DIS: int
+    EST: str | None = None
     Profesor: str | None
     SesionNum: str | None
     Horas: str | None

@@ -10,6 +10,7 @@ class Seccion(SQLModel, table=True):
     nrc: str
     cupos: int
     cupos_disponibles: int
+    est: str | None = Field(default=None, nullable=True)
     periodo_inicio: datetime | None = Field(default=None, nullable=True)
     periodo_fin: datetime | None = Field(default=None, nullable=True)
 

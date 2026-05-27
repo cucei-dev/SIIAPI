@@ -62,6 +62,11 @@ class TasksService:
             def txt(cell):
                 return cell.get_text(" ", strip=True)
 
+            # Detect format (CUCEI adds "EST" column between "DIS" and "Ses/Hora")
+            has_est = len(tds) >= 10
+            idx_schedule = 8 if has_est else 7
+            idx_professor = 9 if has_est else 8
+
             base_info = {
                 "NRC": txt(tds[0]),
                 "Clave": txt(tds[1]) if len(tds) > 1 else None,
@@ -70,11 +75,12 @@ class TasksService:
                 "CR": txt(tds[4]) if len(tds) > 4 else None,
                 "CUP": txt(tds[5]) if len(tds) > 5 else None,
                 "DIS": txt(tds[6]) if len(tds) > 6 else None,
+                "EST": txt(tds[7]) if has_est else None,
             }
 
             profesor = None
-            if len(tds) > 8:
-                inner_prof = tds[8].find("table")
+            if len(tds) > idx_professor:
+                inner_prof = tds[idx_professor].find("table")
                 if inner_prof:
                     prof_tr = inner_prof.find("tr")
                     if prof_tr and len(prof_tr.find_all("td")) >= 2:
@@ -82,13 +88,13 @@ class TasksService:
                     elif prof_tr:
                         profesor = txt(prof_tr)
                 else:
-                    profesor = txt(tds[8])
+                    profesor = txt(tds[idx_professor])
 
             base_info["Profesor"] = profesor
 
             horario_str = None
-            if len(tds) > 7:
-                inner_table = tds[7].find("table")
+            if len(tds) > idx_schedule:
+                inner_table = tds[idx_schedule].find("table")
                 if inner_table:
                     parts = []
                     for ir in inner_table.find_all("tr"):
@@ -99,7 +105,7 @@ class TasksService:
                         )
                     horario_str = " ; ".join(p for p in parts if p.strip())
                 else:
-                    horario_str = txt(tds[7])
+                    horario_str = txt(tds[idx_schedule])
 
             if horario_str and horario_str.strip():
                 sesiones = horario_str.split(";")
@@ -337,6 +343,7 @@ class TasksService:
                     name=data.Sec,
                     cupos=int(data.CUP),
                     cupos_disponibles=int(data.DIS),
+                    est=data.EST,
                     periodo_inicio=periodo_inicio,
                     periodo_fin=periodo_fin,
                     materia_id=materia.id,
@@ -360,6 +367,7 @@ class TasksService:
                     nrc=data.NRC,
                     cupos=int(data.CUP),
                     cupos_disponibles=int(data.DIS),
+                    est=data.EST,
                     periodo_inicio=periodo_inicio,
                     periodo_fin=periodo_fin,
                     centro_id=centro_id,

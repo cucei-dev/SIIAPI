@@ -10,6 +10,7 @@ class SeccionBase(SQLModel):
     nrc: str
     cupos: int
     cupos_disponibles: int
+    est: str | None
     periodo_inicio: datetime | None
     periodo_fin: datetime | None
     centro_id: int
@@ -27,6 +28,7 @@ class SeccionUpdate(SQLModel):
     nrc: str | None
     cupos: int | None
     cupos_disponibles: int | None
+    est: str | None
     periodo_inicio: datetime | None
     periodo_fin: datetime | None
     centro_id: int | None
