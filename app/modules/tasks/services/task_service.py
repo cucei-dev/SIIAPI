@@ -48,7 +48,13 @@ class TasksService:
         self.clase_service = clase_service
 
     def parse_table(self, soup: BeautifulSoup) -> list[dict]:
-        tabla = soup.find("table")
+        # Find the table that contains "NRC" in its headers
+        tabla = None
+        for t in soup.find_all("table"):
+            if any("NRC" in th.get_text() for th in t.find_all("th")):
+                tabla = t
+                break
+
         if not tabla:
             return []
 
@@ -56,7 +62,11 @@ class TasksService:
         datos_finales = []
         for tr in filas:
             tds = tr.find_all("td", recursive=False)
-            if not tds or not re.match(r"^\d{4,}", tds[0].get_text(strip=True)):
+            if not tds:
+                continue
+
+            nrc_text = tds[0].get_text(strip=True)
+            if not re.match(r"^\d{4,}", nrc_text):
                 continue
 
             def txt(cell):
@@ -98,11 +108,10 @@ class TasksService:
                 if inner_table:
                     parts = []
                     for ir in inner_table.find_all("tr"):
-                        parts.append(
-                            " | ".join(
-                                [c.get_text(" ", strip=True) for c in ir.find_all("td")]
-                            )
-                        )
+                        tr_parts = [
+                            c.get_text(" ", strip=True) for c in ir.find_all("td")
+                        ]
+                        parts.append(" | ".join(tr_parts))
                     horario_str = " ; ".join(p for p in parts if p.strip())
                 else:
                     horario_str = txt(tds[idx_schedule])
@@ -150,6 +159,8 @@ class TasksService:
         }
 
         response = requests.post(settings.SIIAU_URL, data=payload)
+        response.encoding = "iso-8859-1"  # SIIAU uses ISO-8859-1
+
         soup = BeautifulSoup(response.text, "html.parser")
 
         return self.parse_table(soup)
